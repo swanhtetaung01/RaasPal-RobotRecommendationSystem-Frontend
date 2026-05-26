@@ -1,0 +1,63 @@
+{
+  "nav": {
+    "dashboard": "控制台",
+    "requirements": "需求",
+    "proposals": "提案",
+    "robots": "机器人",
+    "users": "用户",
+    "login": "登录",
+    "logout": "退出登录",
+    "settings": "设置"
+  },
+  "common": {
+    "welcome": "欢迎使用 RaasPal",
+    "tagline": "为您的工作空间提供 AI 驱动的机器人推荐",
+    "loading": "加载中…",
+    "error": "出了点问题",
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "确认",
+    "delete": "删除",
+    "edit": "编辑",
+    "back": "返回",
+    "viewAll": "查看全部",
+    "learnMore": "了解更多"
+  },
+  "dashboard": {
+    "title": "控制台",
+    "subtitle": "RAASPAL × Octagon",
+    "overview": "概览"
+  },
+  "requirements": {
+    "title": "需求",
+    "new": "新建需求",
+    "empty": "暂无需求"
+  },
+  "proposals": {
+    "title": "提案",
+    "new": "新建提案",
+    "empty": "暂无提案"
+  },
+  "robots": {
+    "title": "机器人目录",
+    "empty": "未找到机器人"
+  },
+  "language": {
+    "select": "语言",
+    "en": "English",
+    "th": "ไทย",
+    "zh": "中文"
+  },
+  "home": {
+    "heroTitle": "为您的业务找到合适的机器人",
+    "heroSubtitle": "告诉我们您的工作空间需求，我们的 AI 引擎将从经过验证的目录中为您匹配最合适的清洁机器人。",
+    "feature1Title": "智能匹配",
+    "feature1Desc": "AI 根据您的硬性条件和偏好对每台机器人进行评分。",
+    "feature2Title": "经过验证的目录",
+    "feature2Desc": "每台机器人的规格都经过 RAASPAL 团队的测试和验证。",
+    "feature3Title": "完整提案",
+    "feature3Desc": "获取包含排名机器人、评分和 AI 解释的详细提案。",
+    "currentLocale": "当前语言",
+    "i18nStatus": "i18n 运行正常"
+  }
+}
