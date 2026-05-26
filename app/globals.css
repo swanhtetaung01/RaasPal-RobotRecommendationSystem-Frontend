@@ -1,26 +1,113 @@
 @import "tailwindcss";
 
+/* ─── Design tokens ──────────────────────────────────────────────────────────
+   All colours live here as CSS custom properties so they can be overridden
+   in a single place (e.g. for a light mode toggle later).
+   `@theme inline` maps each token to a Tailwind utility:
+     --color-canvas  →  bg-canvas / text-canvas / border-canvas
+     --color-accent  →  bg-accent / text-accent / border-accent  …etc.
+─────────────────────────────────────────────────────────────────────────── */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Backgrounds */
+  --canvas:        #0d1117;   /* page background          */
+  --surface:       #161b22;   /* cards, sidebar, panels   */
+  --elevated:      #21262d;   /* hover states, dropdowns  */
+  --overlay:       #30363d40; /* modal scrim              */
+
+  /* Borders */
+  --edge:          #30363d;
+  --edge-subtle:   #21262d;
+
+  /* Text */
+  --ink:           #e6edf3;   /* primary text             */
+  --ink-muted:     #8b949e;   /* secondary / placeholder  */
+  --ink-dim:       #484f58;   /* disabled / timestamps    */
+
+  /* Accent — teal */
+  --accent:        #00c9a7;
+  --accent-hover:  #00e5be;
+  --accent-faint:  rgba(0, 201, 167, 0.10);
+  --accent-glow:   rgba(0, 201, 167, 0.20);
+
+  /* Semantic */
+  --danger:        #f85149;
+  --warning:       #d29922;
+  --success:       #3fb950;
+  --info:          #388bfd;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Surfaces */
+  --color-canvas:        var(--canvas);
+  --color-surface:       var(--surface);
+  --color-elevated:      var(--elevated);
+
+  /* Borders */
+  --color-edge:          var(--edge);
+  --color-edge-subtle:   var(--edge-subtle);
+
+  /* Text */
+  --color-ink:           var(--ink);
+  --color-ink-muted:     var(--ink-muted);
+  --color-ink-dim:       var(--ink-dim);
+
+  /* Accent */
+  --color-accent:        var(--accent);
+  --color-accent-hover:  var(--accent-hover);
+  --color-accent-faint:  var(--accent-faint);
+  --color-accent-glow:   var(--accent-glow);
+
+  /* Semantic */
+  --color-danger:        var(--danger);
+  --color-warning:       var(--warning);
+  --color-success:       var(--success);
+  --color-info:          var(--info);
+
+  /* Fonts (resolved by next/font in [locale]/layout.tsx) */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── Base styles ─────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  border-color: var(--edge);
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans, Arial, Helvetica, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar (WebKit) ──────────────────────────────────────────────────── */
+
+::-webkit-scrollbar               { width: 6px; height: 6px; }
+::-webkit-scrollbar-track         { background: var(--canvas); }
+::-webkit-scrollbar-thumb         { background: var(--elevated); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover   { background: var(--edge); }
+
+/* ─── Selection ───────────────────────────────────────────────────────────── */
+
+::selection {
+  background-color: var(--accent-faint);
+  color: var(--accent);
+}
+
+/* ─── Focus ring ──────────────────────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }

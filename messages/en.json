@@ -1,0 +1,63 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "requirements": "Requirements",
+    "proposals": "Proposals",
+    "robots": "Robots",
+    "users": "Users",
+    "login": "Login",
+    "logout": "Logout",
+    "settings": "Settings"
+  },
+  "common": {
+    "welcome": "Welcome to RaasPal",
+    "tagline": "AI-powered robot recommendation for your workspace",
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "viewAll": "View all",
+    "learnMore": "Learn more"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "RAASPAL × Octagon",
+    "overview": "Overview"
+  },
+  "requirements": {
+    "title": "Requirements",
+    "new": "New Requirement",
+    "empty": "No requirements yet"
+  },
+  "proposals": {
+    "title": "Proposals",
+    "new": "New Proposal",
+    "empty": "No proposals yet"
+  },
+  "robots": {
+    "title": "Robot Catalog",
+    "empty": "No robots found"
+  },
+  "language": {
+    "select": "Language",
+    "en": "English",
+    "th": "ไทย",
+    "zh": "中文"
+  },
+  "home": {
+    "heroTitle": "Find the Right Robot for Your Business",
+    "heroSubtitle": "Tell us your workspace requirements and our AI engine will match you with the best-fit cleaning robots from our verified catalog.",
+    "feature1Title": "Smart Matching",
+    "feature1Desc": "AI scores every robot against your hard constraints and soft preferences.",
+    "feature2Title": "Verified Catalog",
+    "feature2Desc": "Every robot spec is tested and validated by the RAASPAL team.",
+    "feature3Title": "Full Proposals",
+    "feature3Desc": "Get a detailed proposal with ranked robots, scores, and AI explanations.",
+    "currentLocale": "Current language",
+    "i18nStatus": "i18n is working"
+  }
+}
