@@ -26,6 +26,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
+import { Providers } from '@/app/providers';
 
 /* ─── Fonts ──────────────────────────────────────────────────────────────── */
 
@@ -49,11 +50,11 @@ export function generateStaticParams() {
 
 export const metadata: Metadata = {
   title: {
-    default: 'RaasPal — Robot Recommendation System',
-    template: '%s · RaasPal',
+    default: 'RAAS PAL - Robot Recommendation System',
+    template: '%s - RAAS PAL',
   },
   description:
-    'AI-powered robot recommendation platform by RAASPAL × Octagon. ' +
+    'AI-powered robot recommendation platform by RAAS PAL. ' +
     'Match the right cleaning robot to your workspace in minutes.',
 };
 
@@ -85,7 +86,9 @@ export default async function LocaleLayout({
     >
       <body className="min-h-dvh flex flex-col bg-canvas text-ink antialiased">
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <Providers>
+            {children}
+          </Providers>
         </NextIntlClientProvider>
       </body>
     </html>

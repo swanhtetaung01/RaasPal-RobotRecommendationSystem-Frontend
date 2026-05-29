@@ -8,24 +8,66 @@
  * works but is deprecated and emits a warning.
  *
  * WHAT it does:
- * next-intl's createMiddleware inspects every incoming request and:
- *   1. Reads the Accept-Language header / locale cookie to detect the user's
- *      preferred locale.
- *   2. If the URL has no locale prefix  (e.g. /)  it redirects to /en.
- *   3. If the URL has a valid prefix it rewrites internally so that
- *      app/[locale]/... receives the correct `params.locale`.
- *   4. Injects the resolved locale into a request header so that
- *      getRequestConfig (i18n/request.ts) can read it server-side.
+ * 1. Auth guard — if the request has no JWT in the cookie (raaspal_token)
+ *    and the path is not a public route, redirect to /[locale]/login.
+ *    NOTE: We use an httpOnly cookie for SSR auth checks (set by the login
+ *    page after receiving the token from the API).  The Zustand store +
+ *    localStorage handle client-side state; the cookie provides the edge
+ *    signal for the proxy layer.
+ *
+ * 2. i18n routing — next-intl handles locale detection and prefix injection.
+ *
+ * Public paths that bypass the auth check:
+ *   /[locale]/login   — the login page itself
+ *   /_next/*          — Next.js internals
+ *   /api/*            — we don't proxy backend API calls here
+ *   /favicon.ico etc. — static assets
  */
 import createMiddleware from 'next-intl/middleware';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { routing } from './i18n/routing';
 
 // Build the handler once at module level (no per-request overhead).
 const handleI18nRouting = createMiddleware(routing);
 
-export function proxy(request: Request) {
-  // next-intl expects a NextRequest; the runtime type is compatible.
-  return handleI18nRouting(request as Parameters<typeof handleI18nRouting>[0]);
+/** Paths that do NOT require a JWT. Matched against the path after locale strip. */
+const PUBLIC_PATHS = ['/login'];
+
+/** Returns true if the path (locale stripped) is a public route. */
+function isPublic(pathname: string): boolean {
+  // Strip locale prefix: /en/login → /login
+  const stripped = pathname.replace(/^\/(?:en|th|zh)/, '') || '/';
+  return PUBLIC_PATHS.some((p) => stripped === p || stripped.startsWith(`${p}/`));
+}
+
+export function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Always let i18n handle the routing first — it may redirect / → /en
+  const i18nResponse = handleI18nRouting(request);
+
+  // If i18n already issued a redirect, honour it (locale normalisation).
+  if (i18nResponse && i18nResponse.status >= 300 && i18nResponse.status < 400) {
+    return i18nResponse;
+  }
+
+  // Public paths bypass the auth check.
+  if (isPublic(pathname)) {
+    return i18nResponse ?? NextResponse.next();
+  }
+
+  // Check for the auth cookie set by the login page.
+  const token = request.cookies.get('raaspal_token')?.value;
+  if (!token) {
+    // Determine target locale from the pathname prefix.
+    const localeMatch = pathname.match(/^\/(en|th|zh)/);
+    const locale = localeMatch ? localeMatch[1] : routing.defaultLocale;
+    const loginUrl = new URL(`/${locale}/login`, request.url);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  return i18nResponse ?? NextResponse.next();
 }
 
 export const config = {
@@ -36,7 +78,6 @@ export const config = {
    * The negative-lookahead keeps proxy fast: it only fires on real page routes.
    */
   matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    '/(api|trpc)(.*)',
+    '/((?!_next|api|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
   ],
 };

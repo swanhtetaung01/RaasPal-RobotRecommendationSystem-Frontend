@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 /* ─── Design tokens ──────────────────────────────────────────────────────────
    All colours live here as CSS custom properties so they can be overridden
@@ -35,6 +36,56 @@
   --warning:       #d29922;
   --success:       #3fb950;
   --info:          #388bfd;
+
+  /* RAAS PAL app theme - light */
+  --app-bg:        #f4fbff;
+  --app-panel:     #ffffff;
+  --app-panel-soft:#eaf8fd;
+  --app-panel-alt: #f7fcff;
+  --app-border:    #d8ecf4;
+  --app-border-strong:#b8dbe8;
+  --app-text:      #102532;
+  --app-muted:     #607784;
+  --app-faint:     #ecf8fc;
+  --app-brand:     #16b9d1;
+  --app-brand-dark:#087ec3;
+  --app-brand-soft:#dff7fc;
+  --app-brand-glow:rgba(22, 185, 209, 0.28);
+  --app-hero:      #072536;
+  --app-hero-soft: rgba(255, 255, 255, 0.10);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --canvas:        #061723;
+  --surface:       #0d2533;
+  --elevated:      #123244;
+  --edge:          #22495d;
+  --edge-subtle:   #173547;
+  --ink:           #f0fbff;
+  --ink-muted:     #9bc2d1;
+  --ink-dim:       #5f8798;
+  --accent:        #16c9e4;
+  --accent-hover:  #42d9ef;
+  --accent-faint:  rgba(22, 201, 228, 0.14);
+  --accent-glow:   rgba(22, 201, 228, 0.28);
+
+  --app-bg:        #061723;
+  --app-panel:     #0d2533;
+  --app-panel-soft:#0a202e;
+  --app-panel-alt: #102f41;
+  --app-border:    #22495d;
+  --app-border-strong:#2f637b;
+  --app-text:      #f0fbff;
+  --app-muted:     #9bc2d1;
+  --app-faint:     #123244;
+  --app-brand:     #16c9e4;
+  --app-brand-dark:#35a8ff;
+  --app-brand-soft:rgba(22, 201, 228, 0.16);
+  --app-brand-glow:rgba(22, 201, 228, 0.34);
+  --app-hero:      #071b29;
+  --app-hero-soft: rgba(255, 255, 255, 0.08);
 }
 
 @theme inline {
@@ -79,7 +130,7 @@
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
   scroll-behavior: smooth;
 }
 
@@ -110,4 +161,80 @@ body {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* ─── shadcn/ui token bridge ──────────────────────────────────────────────────
+   Maps shadcn's semantic CSS variables to the RAASPAL design system so that
+   shadcn components (Button, Input, Card…) pick up the correct brand colours.
+─────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --background:        var(--app-bg);
+  --foreground:        var(--app-text);
+  --card:              var(--app-panel);
+  --card-foreground:   var(--app-text);
+  --popover:           var(--app-panel);
+  --popover-foreground:var(--app-text);
+  --primary:           var(--app-brand);
+  --primary-foreground:#ffffff;
+  --secondary:         var(--app-panel-soft);
+  --secondary-foreground:var(--app-text);
+  --muted:             var(--app-panel-alt);
+  --muted-foreground:  var(--app-muted);
+  --accent:            var(--app-brand-soft);
+  --accent-foreground: var(--app-brand-dark);
+  --destructive:       #f85149;
+  --destructive-foreground:#ffffff;
+  --border:            var(--app-border);
+  --input:             var(--app-border);
+  --ring:              var(--app-brand);
+  --radius:            0.625rem;
+}
+
+.dark {
+  --background:        var(--app-bg);
+  --foreground:        var(--app-text);
+  --card:              var(--app-panel);
+  --card-foreground:   var(--app-text);
+  --popover:           var(--app-panel);
+  --popover-foreground:var(--app-text);
+  --primary:           var(--app-brand);
+  --primary-foreground:#ffffff;
+  --secondary:         var(--app-panel-soft);
+  --secondary-foreground:var(--app-text);
+  --muted:             var(--app-panel-alt);
+  --muted-foreground:  var(--app-muted);
+  --accent:            var(--app-brand-soft);
+  --accent-foreground: var(--app-brand-dark);
+  --destructive:       #f85149;
+  --destructive-foreground:#ffffff;
+  --border:            var(--app-border);
+  --input:             var(--app-border);
+  --ring:              var(--app-brand);
+}
+
+@theme inline {
+  --color-background:        var(--background);
+  --color-foreground:        var(--foreground);
+  --color-card:              var(--card);
+  --color-card-foreground:   var(--card-foreground);
+  --color-popover:           var(--popover);
+  --color-popover-foreground:var(--popover-foreground);
+  --color-primary:           var(--primary);
+  --color-primary-foreground:var(--primary-foreground);
+  --color-secondary:         var(--secondary);
+  --color-secondary-foreground:var(--secondary-foreground);
+  --color-muted:             var(--muted);
+  --color-muted-foreground:  var(--muted-foreground);
+  --color-accent:            var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive:       var(--destructive);
+  --color-destructive-foreground:var(--destructive-foreground);
+  --color-border:            var(--border);
+  --color-input:             var(--input);
+  --color-ring:              var(--ring);
+  --radius-sm:               calc(var(--radius) - 4px);
+  --radius-md:               calc(var(--radius) - 2px);
+  --radius-lg:               var(--radius);
+  --radius-xl:               calc(var(--radius) + 4px);
 }
