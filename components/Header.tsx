@@ -26,7 +26,7 @@ export async function Header() {
         <Link
           href="/"
           className="flex items-center gap-2.5 mr-auto group"
-          aria-label="RaasPal home"
+          aria-label="RAAS PAL home"
         >
           {/* Logo icon */}
           <span className="
@@ -40,10 +40,10 @@ export async function Header() {
 
           <span className="flex flex-col leading-none">
             <span className="text-sm font-bold text-ink tracking-tight">
-              RaasPal
+              RAAS PAL
             </span>
             <span className="text-[10px] text-ink-dim font-medium tracking-widest uppercase">
-              × Octagon
+              Robot as a Service
             </span>
           </span>
         </Link>
@@ -52,8 +52,8 @@ export async function Header() {
         <nav className="hidden sm:flex items-center gap-1" aria-label="Main navigation">
           {[
             { href: '/dashboard',    label: t('dashboard')    },
-            { href: '/requirements', label: t('requirements') },
-            { href: '/proposals',    label: t('proposals')    },
+            { href: '/generate-solution', label: t('generateSolution') },
+            { href: '/solutions',    label: t('solutions')    },
             { href: '/robots',       label: t('robots')       },
           ].map(({ href, label }) => (
             <Link
