@@ -30,8 +30,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files — local secrets are never committed; .env.production is safe (public URL only)
+.env.local
+.env*.local
 
 # vercel
 .vercel
