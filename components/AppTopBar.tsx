@@ -7,10 +7,10 @@ import { UserMenu } from '@/components/UserMenu';
 type AppTopBarProps = {
   eyebrow: string;
   title: string;
-  searchPlaceholder: string;
+  searchPlaceholder?: string;
 };
 
-export function AppTopBar({ eyebrow, title, searchPlaceholder }: AppTopBarProps) {
+export function AppTopBar({ eyebrow, title, searchPlaceholder = '' }: AppTopBarProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-[var(--app-border)] bg-[var(--app-panel)]/85 px-4 py-3 backdrop-blur-xl sm:px-6">
       <div className="flex items-center gap-3">

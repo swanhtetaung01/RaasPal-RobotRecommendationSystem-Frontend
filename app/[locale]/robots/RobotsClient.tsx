@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Bot, Loader2 } from 'lucide-react';
+import { Bot, Loader2, Plus } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
 import { robotApi } from '@/lib/api';
+import { RobotDetailModal } from '@/components/RobotDetailModal';
 import type { RobotResponse, RobotType } from '@/types/api';
 
 /* ─── Badges ──────────────────────────────────────────────────────────────── */
@@ -23,9 +25,11 @@ function TypeBadge({ type }: { type: RobotType }) {
 
 function StatusBadge({ status }: { status: RobotResponse['testStatus'] }) {
   const styles: Record<RobotResponse['testStatus'], string> = {
-    VERIFIED: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400',
-    PENDING:  'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400',
-    REJECTED: 'bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400',
+    VERIFIED:     'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400',
+    PENDING:      'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400',
+    UNDER_TESTING:'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400',
+    REJECTED:     'bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400',
+    DRAFT:        'bg-gray-100 text-gray-500 dark:bg-gray-900/40 dark:text-gray-400',
   };
   return (
     <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${styles[status]}`}>
@@ -36,7 +40,7 @@ function StatusBadge({ status }: { status: RobotResponse['testStatus'] }) {
 
 function PriceBadge({ band }: { band: RobotResponse['priceBand'] }) {
   const labels: Record<RobotResponse['priceBand'], string> = {
-    LOW: '$', MEDIUM: '$$', HIGH: '$$$', PREMIUM: '$$$$',
+    LOW: '$', MEDIUM: '$$', MODERATE: '$$', HIGH: '$$$', PREMIUM: '$$$$',
   };
   return (
     <span className="rounded-full bg-[var(--app-faint)] px-2.5 py-0.5 text-xs font-bold text-[var(--app-muted)]">
@@ -47,7 +51,7 @@ function PriceBadge({ band }: { band: RobotResponse['priceBand'] }) {
 
 /* ─── Robot card ──────────────────────────────────────────────────────────── */
 
-function RobotCard({ robot }: { robot: RobotResponse }) {
+function RobotCard({ robot, onClick }: { robot: RobotResponse; onClick: () => void }) {
   const s = robot.spec;
 
   const specs = [
@@ -66,13 +70,21 @@ function RobotCard({ robot }: { robot: RobotResponse }) {
   ].filter(Boolean) as string[];
 
   return (
-    <article className="flex flex-col rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--app-brand)] hover:shadow-md hover:shadow-[var(--app-brand-glow)]">
+    <article onClick={onClick} className="flex flex-col rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5 shadow-sm transition cursor-pointer hover:-translate-y-0.5 hover:border-[var(--app-brand)] hover:shadow-md hover:shadow-[var(--app-brand-glow)]">
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--app-brand-soft)] text-[var(--app-brand-dark)]">
-            <Bot className="h-5 w-5" />
-          </span>
+          {robot.imageUrl ? (
+            <img
+              src={robot.imageUrl}
+              alt={`${robot.brand} ${robot.model}`}
+              className="h-10 w-10 shrink-0 rounded-xl object-contain bg-[var(--app-faint)]"
+            />
+          ) : (
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--app-brand-soft)] text-[var(--app-brand-dark)]">
+              <Bot className="h-5 w-5" />
+            </span>
+          )}
           <div>
             <p className="font-bold text-[var(--app-text)]">{robot.brand}</p>
             <p className="text-sm text-[var(--app-muted)]">{robot.model}</p>
@@ -120,6 +132,7 @@ const TYPES: Array<{ key: RobotType | 'ALL'; label: string }> = [
 
 export function RobotsClient() {
   const [activeType, setActiveType] = useState<RobotType | 'ALL'>('ALL');
+  const [selectedRobot, setSelectedRobot] = useState<RobotResponse | null>(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['robots'],
@@ -132,7 +145,7 @@ export function RobotsClient() {
   return (
     <div className="space-y-5 p-4 sm:p-6">
 
-      {/* Filter tabs */}
+      {/* Filter tabs + Add button */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex gap-2">
           {TYPES.map(({ key, label }) => (
@@ -155,9 +168,18 @@ export function RobotsClient() {
             </button>
           ))}
         </div>
-        <p className="text-sm text-[var(--app-muted)]">
-          {isLoading ? 'Loading…' : `${filtered.length} robot${filtered.length === 1 ? '' : 's'}`}
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="text-sm text-[var(--app-muted)]">
+            {isLoading ? 'Loading…' : `${filtered.length} robot${filtered.length === 1 ? '' : 's'}`}
+          </p>
+          <Link
+            href="/robots/new"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--app-brand)] px-3 py-1.5 text-sm font-semibold text-white transition hover:opacity-90"
+          >
+            <Plus className="h-4 w-4" />
+            Add Robot
+          </Link>
+        </div>
       </div>
 
       {/* States */}
@@ -184,9 +206,14 @@ export function RobotsClient() {
       {filtered.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((robot) => (
-            <RobotCard key={robot.id} robot={robot} />
+            <RobotCard key={robot.id} robot={robot} onClick={() => setSelectedRobot(robot)} />
           ))}
         </div>
+      )}
+
+      {/* Detail modal */}
+      {selectedRobot && (
+        <RobotDetailModal robot={selectedRobot} onClose={() => setSelectedRobot(null)} />
       )}
     </div>
   );

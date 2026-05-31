@@ -15,7 +15,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
 import { recommendationApi } from '@/lib/api';
-import type { RecommendationItem, RecommendationResponse } from '@/types/api';
+import type { RecommendationItemResponse, RecommendationResponse } from '@/types/api';
 import { AppSidebar } from '@/components/AppSidebar';
 import { AppTopBar } from '@/components/AppTopBar';
 import { Button } from '@/components/ui/button';
@@ -70,10 +70,10 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
       .finally(() => setLoading(false));
   }, [reqId]);
 
-  function handleSelect(item: RecommendationItem) {
+  function handleSelect(item: RecommendationItemResponse) {
     if (!recommendation) return;
     router.push(
-      `/generate-solution/${solutionType}/proposal?recId=${recommendation.id}&robotId=${item.robotId}`,
+      `/generate-solution/${solutionType}/proposal?recId=${recommendation.id}&robotId=${item.robot.id}`,
       { locale },
     );
   }
@@ -130,10 +130,10 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
             {recommendation && !loading && (
               <>
                 {/* AI summary */}
-                {recommendation.aiSummary && (
+                {recommendation.aiExplanation && (
                   <div className="rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5">
                     <p className="mb-2 text-xs font-semibold uppercase text-[var(--app-muted)]">AI summary</p>
-                    <p className="text-sm leading-6 text-[var(--app-text)]">{recommendation.aiSummary}</p>
+                    <p className="text-sm leading-6 text-[var(--app-text)]">{recommendation.aiExplanation}</p>
                     <p className="mt-3 text-xs text-[var(--app-muted)] italic">
                       Final selection requires RAASPAL team verification and site survey.
                     </p>
@@ -142,10 +142,11 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
 
                 {/* Robot cards */}
                 <div className="space-y-4">
-                  {recommendation.items
-                    .sort((a, b) => a.rank - b.rank)
+                  {recommendation.options
+                    .slice()
+                    .sort((a, b) => a.rankPosition - b.rankPosition)
                     .map((item) => {
-                      const meta = rankMeta[item.rank - 1] ?? rankMeta[2];
+                      const meta = rankMeta[item.rankPosition - 1] ?? rankMeta[2];
                       const RankIcon = meta.icon;
                       return (
                         <article
@@ -159,12 +160,12 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
                               </span>
                               <div>
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <h3 className="text-lg font-bold text-[var(--app-text)]">{item.robotName}</h3>
+                                  <h3 className="text-lg font-bold text-[var(--app-text)]">{item.robot.model}</h3>
                                   <Badge className={`text-xs font-semibold ${meta.color}`} variant="secondary">
                                     {meta.label}
                                   </Badge>
                                 </div>
-                                <p className="mt-0.5 text-sm text-[var(--app-muted)]">{item.robotBrand}</p>
+                                <p className="mt-0.5 text-sm text-[var(--app-muted)]">{item.robot.brand}</p>
                               </div>
                             </div>
 
@@ -179,35 +180,21 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
                             </Button>
                           </div>
 
-                          {item.aiReason && (
-                            <p className="mt-4 text-sm leading-6 text-[var(--app-text)]">{item.aiReason}</p>
+                          {item.aiReasoning && (
+                            <p className="mt-4 text-sm leading-6 text-[var(--app-text)]">{item.aiReasoning}</p>
                           )}
 
                           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                            {item.strengths && item.strengths.length > 0 && (
+                            {item.whyRecommended && (
                               <div>
-                                <p className="mb-2 text-xs font-semibold uppercase text-emerald-600">Strengths</p>
-                                <ul className="space-y-1">
-                                  {item.strengths.map((s) => (
-                                    <li key={s} className="flex items-start gap-2 text-sm text-[var(--app-text)]">
-                                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                                      {s}
-                                    </li>
-                                  ))}
-                                </ul>
+                                <p className="mb-2 text-xs font-semibold uppercase text-emerald-600">Why recommended</p>
+                                <p className="text-sm leading-6 text-[var(--app-text)]">{item.whyRecommended}</p>
                               </div>
                             )}
-                            {item.limitations && item.limitations.length > 0 && (
+                            {item.limitations && (
                               <div>
                                 <p className="mb-2 text-xs font-semibold uppercase text-amber-600">Limitations</p>
-                                <ul className="space-y-1">
-                                  {item.limitations.map((l) => (
-                                    <li key={l} className="flex items-start gap-2 text-sm text-[var(--app-text)]">
-                                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
-                                      {l}
-                                    </li>
-                                  ))}
-                                </ul>
+                                <p className="text-sm leading-6 text-[var(--app-text)]">{item.limitations}</p>
                               </div>
                             )}
                           </div>

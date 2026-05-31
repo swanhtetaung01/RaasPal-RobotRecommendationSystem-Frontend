@@ -9,6 +9,7 @@ import {
   Download,
   FileText,
   Loader2,
+  Presentation,
   Printer,
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
@@ -26,6 +27,7 @@ interface ProposalViewClientProps {
 export function ProposalViewClient({ id }: ProposalViewClientProps) {
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [downloadingPptx, setDownloadingPptx] = useState(false);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['proposal', id],
@@ -48,6 +50,22 @@ export function ProposalViewClient({ id }: ProposalViewClientProps) {
       await exportProposalToPdf(proposal);
     } finally {
       setDownloading(false);
+    }
+  }
+
+  async function handleDownloadPptx() {
+    if (!proposal) return;
+    setDownloadingPptx(true);
+    try {
+      const res = await proposalApi.exportPptx(proposal.id);
+      const url = URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `proposal-${proposal.selectedRobotName ?? proposal.id}.pptx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setDownloadingPptx(false);
     }
   }
 
@@ -138,6 +156,19 @@ export function ProposalViewClient({ id }: ProposalViewClientProps) {
                       <><Loader2 className="h-4 w-4 animate-spin" />Preparing PDF…</>
                     ) : (
                       <><Download className="h-4 w-4" />Download PDF</>
+                    )}
+                  </Button>
+                  <Button
+                    className="gap-2 border-[var(--app-border)] bg-[var(--app-panel)] text-[var(--app-text)] hover:bg-[var(--app-faint)]"
+                    disabled={downloadingPptx}
+                    onClick={handleDownloadPptx}
+                    type="button"
+                    variant="outline"
+                  >
+                    {downloadingPptx ? (
+                      <><Loader2 className="h-4 w-4 animate-spin" />Preparing PPTX…</>
+                    ) : (
+                      <><Presentation className="h-4 w-4" />Download PowerPoint</>
                     )}
                   </Button>
                   <Button

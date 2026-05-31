@@ -15,7 +15,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
 export const api = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 30_000,
+  timeout: 60_000,
 });
 
 /* ─── Request interceptor ─────────────────────────────────────────────────── */
@@ -57,8 +57,11 @@ import type {
   RecommendationItemResponse,
   RecommendationResponse,
   RequirementResponse,
+  RobotImportResult,
+  RobotRequest,
   RobotResponse,
   RobotType,
+  TestStatus,
   UserResponse,
 } from '@/types/api';
 
@@ -78,6 +81,25 @@ export const robotApi = {
 
   getById: (id: string) =>
     api.get<ApiResponse<RobotResponse>>(`/api/v1/robots/${id}`),
+
+  create: (body: RobotRequest) =>
+    api.post<ApiResponse<RobotResponse>>('/api/v1/robots', body),
+
+  update: (id: string, body: RobotRequest) =>
+    api.put<ApiResponse<RobotResponse>>(`/api/v1/robots/${id}`, body),
+
+  delete: (id: string) =>
+    api.delete<ApiResponse<void>>(`/api/v1/robots/${id}`),
+
+  importCatalog: (file: File, robotType: RobotType = 'CLEANING', testStatus: TestStatus = 'PENDING') => {
+    const form = new FormData();
+    form.append('file', file);
+    return api.post<ApiResponse<RobotImportResult>>(
+      '/api/v1/robots/import',
+      form,
+      { headers: { 'Content-Type': undefined }, params: { robotType, testStatus } },
+    );
+  },
 };
 
 // Auth
@@ -97,7 +119,7 @@ export const fileApi = {
     return api.post<ApiResponse<FileUploadResponse>>(
       '/api/v1/files/upload',
       form,
-      { headers: { 'Content-Type': 'multipart/form-data' } },
+      { headers: { 'Content-Type': undefined } },
     );
   },
 };
@@ -135,4 +157,7 @@ export const proposalApi = {
 
   getById: (id: string) =>
     api.get<ApiResponse<GeneratedProposalResponse>>(`/api/v1/proposals/${id}`),
+
+  exportPptx: (id: string) =>
+    api.get(`/api/v1/proposals/${id}/export/pptx`, { responseType: 'blob' }),
 };
