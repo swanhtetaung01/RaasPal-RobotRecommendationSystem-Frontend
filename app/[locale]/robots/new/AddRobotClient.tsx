@@ -325,7 +325,7 @@ export function AddRobotClient() {
           <SectionCard title="Basic Information">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="Brand" required>
-                <input className={inputCls} value={brand} onChange={(e) => setBrand(e.target.value)} required placeholder="e.g. Gaussian" />
+                <input className={inputCls} value={brand} onChange={(e) => setBrand(e.target.value)} required placeholder="e.g. Gausium" />
               </Field>
               <Field label="Model" required>
                 <input className={inputCls} value={model} onChange={(e) => setModel(e.target.value)} required placeholder="e.g. G2" />
