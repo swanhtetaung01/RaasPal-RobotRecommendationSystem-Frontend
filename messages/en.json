@@ -332,6 +332,9 @@
     "noneInCategory": "No robots in this category yet.",
     "modelCount": "{count, plural, one {# model} other {# models}}",
     "pageRange": "{start}–{end} of {total}",
+    "searchPlaceholder": "Search by brand or model…",
+    "searchResults": "{count, plural, one {# result} other {# results}} for \"{query}\"",
+    "clearSearch": "Clear search",
     "types": {
       "all": "All",
       "cleaning": "Cleaning",

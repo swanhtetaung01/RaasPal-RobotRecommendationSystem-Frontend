@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Bot, ChevronLeft, ChevronRight, Loader2, Plus } from 'lucide-react';
+import { Bot, ChevronLeft, ChevronRight, Loader2, Plus, Search, X } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { robotApi } from '@/lib/api';
 import { RobotDetailModal } from '@/components/RobotDetailModal';
@@ -188,6 +188,7 @@ const TYPE_KEYS: Array<RobotType | 'ALL'> = ['ALL', 'CLEANING', 'DELIVERY', 'MOW
 export function RobotsClient() {
   const [activeType, setActiveType] = useState<RobotType | 'ALL'>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedRobot, setSelectedRobot] = useState<RobotResponse | null>(null);
   const t = useTranslations('robots');
 
@@ -201,7 +202,14 @@ export function RobotsClient() {
     return brandCmp !== 0 ? brandCmp : a.model.localeCompare(b.model);
   });
 
-  const filtered = activeType === 'ALL' ? all : all.filter((r) => r.robotType === activeType);
+  const query = searchQuery.trim().toLowerCase();
+  const searched = query
+    ? all.filter((r) =>
+        r.brand.toLowerCase().includes(query) || r.model.toLowerCase().includes(query),
+      )
+    : all;
+
+  const filtered = activeType === 'ALL' ? searched : searched.filter((r) => r.robotType === activeType);
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   const pageStart = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginated = filtered.slice(pageStart, pageStart + ITEMS_PER_PAGE);
@@ -211,14 +219,44 @@ export function RobotsClient() {
     setCurrentPage(1);
   }
 
+  function handleSearch(q: string) {
+    setSearchQuery(q);
+    setCurrentPage(1);
+  }
+
   return (
     <div className="space-y-5 p-4 sm:p-6">
+
+      {/* Search bar */}
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--app-muted)]" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => handleSearch(e.target.value)}
+          placeholder={t('searchPlaceholder')}
+          className="h-10 w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-panel-alt)] pl-9 pr-9 text-sm text-[var(--app-text)] placeholder:text-[var(--app-muted)] outline-none focus:border-[var(--app-brand)] transition"
+        />
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={() => handleSearch('')}
+            aria-label={t('clearSearch')}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-[var(--app-muted)] hover:text-[var(--app-text)]"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
 
       {/* Filter tabs + Add button */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex gap-2">
           {TYPE_KEYS.map((key) => {
             const label = t(`types.${key === 'ALL' ? 'all' : key.toLowerCase()}`);
+            const count = key === 'ALL'
+              ? searched.length
+              : searched.filter((r) => r.robotType === key).length;
             return (
               <button
                 key={key}
@@ -231,11 +269,7 @@ export function RobotsClient() {
                 }`}
               >
                 {label}
-                {!isLoading && (
-                  <span className="ml-1.5 opacity-70">
-                    {key === 'ALL' ? all.length : all.filter((r) => r.robotType === key).length}
-                  </span>
-                )}
+                {!isLoading && <span className="ml-1.5 opacity-70">{count}</span>}
               </button>
             );
           })}
@@ -243,7 +277,9 @@ export function RobotsClient() {
         <div className="flex items-center gap-3">
           {!isLoading && filtered.length > 0 && (
             <p className="text-sm text-[var(--app-muted)]">
-              {t('pageRange', { start: pageStart + 1, end: Math.min(pageStart + ITEMS_PER_PAGE, filtered.length), total: filtered.length })}
+              {query
+                ? t('searchResults', { count: filtered.length, query: searchQuery })
+                : t('pageRange', { start: pageStart + 1, end: Math.min(pageStart + ITEMS_PER_PAGE, filtered.length), total: filtered.length })}
             </p>
           )}
           <Link
@@ -272,7 +308,11 @@ export function RobotsClient() {
       {!isLoading && !isError && filtered.length === 0 && (
         <div className="rounded-xl border border-dashed border-[var(--app-border)] bg-[var(--app-panel)] py-16 text-center">
           <Bot className="mx-auto h-8 w-8 text-[var(--app-muted)]" />
-          <p className="mt-3 text-sm text-[var(--app-muted)]">{t('noneInCategory')}</p>
+          <p className="mt-3 text-sm text-[var(--app-muted)]">
+            {query
+              ? t('searchResults', { count: 0, query: searchQuery })
+              : t('noneInCategory')}
+          </p>
         </div>
       )}
 
