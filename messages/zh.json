@@ -191,6 +191,26 @@
           "handoff": "员工取件、客户 PIN、电梯交接"
         }
       },
+      "mowing": {
+        "eyebrow": "割草方案录入",
+        "title": "割草方案",
+        "kicker": "割草机器人流程",
+        "headline": "输入割草需求以生成机器人推荐。",
+        "description": "当客户需要对草坪、公园、高尔夫球场或户外区域进行自动割草时使用此表单。",
+        "detailsTitle": "割草详情",
+        "fields": {
+          "visitorVolume": "面积大小",
+          "languages": "地形类型",
+          "tasks": "割草任务",
+          "location": "运营位置"
+        },
+        "placeholders": {
+          "visitorVolume": "5,000 平方米草坪",
+          "languages": "平坦草地、坡地",
+          "tasks": "割草、修边、边缘修剪",
+          "location": "公园、高尔夫球场、度假村"
+        }
+      },
       "concierge": {
         "eyebrow": "接待方案录入",
         "title": "接待方案",
@@ -230,16 +250,103 @@
     "preview": {
       "title": "方案预览",
       "action": "生成方案"
+    },
+    "upload": {
+      "eyebrow": "生成方案 · 上传",
+      "step": "第 1 步，共 3 步 · 上传调查表",
+      "backToTypes": "返回方案类型",
+      "dropFileBrowse": "将文件拖放至此或 浏览",
+      "fileTypes": "PDF、Excel (.xlsx / .xls)、PNG、JPG · 最大 20 MB",
+      "removeFile": "移除文件",
+      "unsupportedFile": "不支持的文件类型，请上传 PDF、Excel、PNG 或 JPG",
+      "generate": "生成推荐",
+      "uploading": "正在上传文件…",
+      "extracting": "正在提取需求…",
+      "done": "完成！正在跳转…",
+      "retry": "重试",
+      "statusUploading": "正在上传文件到 RAAS PAL…",
+      "statusExtracting": "AI 正在提取客户需求…",
+      "disclaimer": "AI 提取结果需经 RAASPAL 核实后才能发送给客户"
+    },
+    "recommendation": {
+      "eyebrow": "生成方案 · 推荐",
+      "title": "机器人推荐",
+      "step": "第 2 步，共 3 步 · 查看推荐",
+      "heading": "AI 生成的机器人推荐",
+      "description": "AI 已将客户需求与已验证的机器人目录进行对比，选择最合适的机器人以生成方案",
+      "backToUpload": "返回上传",
+      "loading": "正在生成推荐…",
+      "loadingSub": "AI 正在将需求与机器人目录进行对比",
+      "noRequirementId": "未找到需求 ID，请重新上传调查文件",
+      "failedGenerate": "推荐生成失败",
+      "errorGeneric": "生成推荐时出现错误",
+      "aiSummary": "AI 摘要",
+      "verificationNote": "最终选择需经 RAASPAL 团队核实和现场勘查",
+      "selectRobot": "选择该机器人",
+      "whyRecommended": "推荐原因",
+      "limitations": "局限性",
+      "rankBest": "最佳匹配",
+      "rank2": "第 2 选项",
+      "rank3": "第 3 选项"
+    },
+    "proposal": {
+      "eyebrow": "生成方案 · 提案",
+      "title": "已生成的提案",
+      "step": "第 3 步，共 3 步 · 提案",
+      "heading": "客户提案",
+      "description": "以下提案由 AI 根据所选机器人和客户需求生成，发送给客户前请审阅并确认",
+      "backToRecommendations": "返回推荐",
+      "loading": "正在生成提案…",
+      "loadingSub": "AI 正在准备客户提案文件",
+      "errorMissingData": "缺少推荐 ID 或机器人 ID，请从上传步骤重新开始",
+      "failedGenerate": "提案生成失败",
+      "errorGeneric": "生成提案时出现错误",
+      "downloadPdf": "下载 PDF",
+      "preparingPdf": "正在准备 PDF…",
+      "copyText": "复制文本",
+      "copied": "已复制！",
+      "print": "打印",
+      "noContent": "未返回内容，后端 AI 服务可能需要配置",
+      "verificationTitle": "⚠ 需要 RAASPAL 核实",
+      "verificationBody": "本提案由 AI 根据客户需求和机器人目录生成，最终规格、定价和场地适宜性须经 RAASPAL 团队和现场勘查确认后方可提交给客户"
     }
   },
   "proposals": {
     "title": "方案列表",
     "new": "新建方案",
-    "empty": "暂无方案"
+    "empty": "暂无方案",
+    "loading": "加载中…",
+    "count": "{count} 个方案",
+    "failedToLoad": "方案加载失败，请刷新页面",
+    "generateFirst": "生成机器人方案以创建第一个提案",
+    "generateSolution": "生成方案",
+    "newSolution": "新建方案",
+    "view": "查看",
+    "generated": "生成于 {date}"
   },
   "robots": {
     "title": "机器人目录",
-    "empty": "未找到机器人"
+    "empty": "未找到机器人",
+    "addRobot": "添加机器人",
+    "failedToLoad": "机器人加载失败，请刷新页面",
+    "noneInCategory": "该分类暂无机器人",
+    "modelCount": "{count} 型号",
+    "pageRange": "{start}–{end} / 共 {total}",
+    "types": {
+      "all": "全部",
+      "cleaning": "清洁",
+      "delivery": "配送",
+      "mowing": "割草"
+    }
+  },
+  "userMenu": {
+    "profile": "个人资料",
+    "profileDetail": "查看账户详情",
+    "settings": "设置",
+    "settingsDetail": "偏好与工作区",
+    "accessRole": "访问权限",
+    "teamRole": "RAASPAL_TEAM",
+    "signOut": "退出登录"
   },
   "language": {
     "select": "语言",

@@ -12,6 +12,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { fileApi, requirementApi } from '@/lib/api';
 import type { RobotType } from '@/types/api';
@@ -61,6 +62,7 @@ type Stage = 'idle' | 'uploading' | 'extracting' | 'done' | 'error';
 
 export function UploadClient({ locale, solutionType, meta }: UploadClientProps) {
   const router = useRouter();
+  const t = useTranslations('generateSolution.upload');
   const [file, setFile] = useState<File | null>(null);
   const [stage, setStage] = useState<Stage>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -76,7 +78,7 @@ export function UploadClient({ locale, solutionType, meta }: UploadClientProps) 
       setFile(dropped);
       setErrorMsg(null);
     } else {
-      setErrorMsg('Unsupported file type. Please upload PDF, Excel, PNG, or JPG.');
+      setErrorMsg(t('unsupportedFile'));
     }
   }, []);
 
@@ -129,11 +131,11 @@ export function UploadClient({ locale, solutionType, meta }: UploadClientProps) 
   }, [file, robotType, solutionType, locale, router]);
 
   const stageLabel: Record<Stage, string> = {
-    idle: 'Generate recommendations',
-    uploading: 'Uploading file…',
-    extracting: 'Extracting requirements…',
-    done: 'Done! Redirecting…',
-    error: 'Retry',
+    idle: t('generate'),
+    uploading: t('uploading'),
+    extracting: t('extracting'),
+    done: t('done'),
+    error: t('retry'),
   };
 
   return (
@@ -143,7 +145,7 @@ export function UploadClient({ locale, solutionType, meta }: UploadClientProps) 
 
         <section className="flex min-w-0 flex-1 flex-col">
           <AppTopBar
-            eyebrow="Generate solution · Upload"
+            eyebrow={t('eyebrow')}
             searchPlaceholder="Search customers, sites, robot criteria"
             title={meta.title}
           />
@@ -155,12 +157,12 @@ export function UploadClient({ locale, solutionType, meta }: UploadClientProps) 
               href={`/generate-solution/${solutionType}`}
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to solution types
+              {t('backToTypes')}
             </Link>
 
             {/* Header */}
             <div className="rounded-xl border border-[var(--app-border)] bg-[var(--app-hero)] p-6 text-white shadow-sm">
-              <p className="text-sm font-semibold uppercase text-cyan-100">Step 1 of 3 · Upload survey</p>
+              <p className="text-sm font-semibold uppercase text-cyan-100">{t('step')}</p>
               <h2 className="mt-2 text-2xl font-bold">{meta.title}</h2>
               <p className="mt-2 max-w-lg text-sm leading-6 text-white/70">{meta.description}</p>
             </div>
@@ -190,12 +192,8 @@ export function UploadClient({ locale, solutionType, meta }: UploadClientProps) 
                   <UploadCloud className="h-8 w-8" />
                 </span>
                 <div className="text-center">
-                  <p className="font-semibold text-[var(--app-text)]">
-                    Drop file here or <span className="text-[var(--app-brand-dark)] underline">browse</span>
-                  </p>
-                  <p className="mt-1 text-sm text-[var(--app-muted)]">
-                    PDF, Excel (.xlsx / .xls), PNG, JPG · Max 20 MB
-                  </p>
+                  <p className="font-semibold text-[var(--app-text)]">{t('dropFileBrowse')}</p>
+                  <p className="mt-1 text-sm text-[var(--app-muted)]">{t('fileTypes')}</p>
                 </div>
               </div>
             </div>
@@ -213,7 +211,7 @@ export function UploadClient({ locale, solutionType, meta }: UploadClientProps) 
                 {stage === 'done' && <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />}
                 {stage === 'idle' || stage === 'error' ? (
                   <button
-                    aria-label="Remove file"
+                    aria-label={t('removeFile')}
                     className="rounded-lg p-1 text-[var(--app-muted)] hover:bg-[var(--app-faint)] hover:text-[var(--app-text)]"
                     onClick={(e) => { e.stopPropagation(); setFile(null); setErrorMsg(null); setStage('idle'); }}
                     type="button"
@@ -230,7 +228,7 @@ export function UploadClient({ locale, solutionType, meta }: UploadClientProps) 
                 <div className="flex items-center gap-3 text-sm">
                   <Loader2 className="h-5 w-5 animate-spin text-[var(--app-brand)]" />
                   <span className="font-semibold text-[var(--app-text)]">
-                    {stage === 'uploading' ? 'Uploading file to RAAS PAL…' : 'AI is extracting customer requirements…'}
+                    {stage === 'uploading' ? t('statusUploading') : t('statusExtracting')}
                   </span>
                 </div>
                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--app-border)]">
@@ -269,7 +267,7 @@ export function UploadClient({ locale, solutionType, meta }: UploadClientProps) 
 
             {/* Disclaimer */}
             <p className="text-center text-xs text-[var(--app-muted)]">
-              AI extraction requires RAASPAL verification before the proposal is sent to the customer.
+              {t('disclaimer')}
             </p>
           </div>
         </section>

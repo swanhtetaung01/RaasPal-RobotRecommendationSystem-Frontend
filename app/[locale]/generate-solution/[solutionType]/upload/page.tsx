@@ -10,40 +10,33 @@
  *   3. Page navigates to /recommendation
  */
 
-import { setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { UploadClient } from './UploadClient';
 
 type Params = {
   params: Promise<{ locale: string; solutionType: string }>;
 };
 
-const VALID_TYPES = ['cleaning', 'delivery', 'concierge'] as const;
+const VALID_TYPES = ['cleaning', 'delivery', 'mowing'] as const;
 type SolutionType = (typeof VALID_TYPES)[number];
 
 export function generateStaticParams() {
   return VALID_TYPES.map((solutionType) => ({ solutionType }));
 }
 
-const solutionLabels: Record<SolutionType, { title: string; description: string }> = {
-  cleaning: {
-    title: 'Cleaning Solution',
-    description: 'Upload the customer\'s cleaning survey or site assessment document.',
-  },
-  delivery: {
-    title: 'Delivery Solution',
-    description: 'Upload the customer\'s delivery workflow or requirements document.',
-  },
-  concierge: {
-    title: 'Concierge Solution',
-    description: 'Upload the customer\'s service requirements or concierge brief.',
-  },
-};
-
 export default async function UploadPage({ params }: Params) {
   const { locale, solutionType } = await params;
   setRequestLocale(locale);
 
-  const meta = solutionLabels[solutionType as SolutionType] ?? solutionLabels.cleaning;
+  const t = await getTranslations({ locale, namespace: 'generateSolution.forms' });
+  const type = VALID_TYPES.includes(solutionType as SolutionType)
+    ? (solutionType as SolutionType)
+    : 'cleaning';
+
+  const meta = {
+    title: t(`${type}.title`),
+    description: t(`${type}.description`),
+  };
 
   return <UploadClient locale={locale} meta={meta} solutionType={solutionType} />;
 }

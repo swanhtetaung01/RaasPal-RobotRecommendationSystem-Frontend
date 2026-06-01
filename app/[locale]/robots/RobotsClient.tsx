@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { Bot, ChevronLeft, ChevronRight, Loader2, Plus } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { robotApi } from '@/lib/api';
@@ -180,12 +181,7 @@ function Pagination({
 
 /* ─── Filter tabs ─────────────────────────────────────────────────────────── */
 
-const TYPES: Array<{ key: RobotType | 'ALL'; label: string }> = [
-  { key: 'ALL',       label: 'All' },
-  { key: 'CLEANING',  label: 'Cleaning' },
-  { key: 'DELIVERY',  label: 'Delivery' },
-  { key: 'MOWING', label: 'Mowing' },
-];
+const TYPE_KEYS: Array<RobotType | 'ALL'> = ['ALL', 'CLEANING', 'DELIVERY', 'MOWING'];
 
 /* ─── Main ────────────────────────────────────────────────────────────────── */
 
@@ -193,6 +189,7 @@ export function RobotsClient() {
   const [activeType, setActiveType] = useState<RobotType | 'ALL'>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRobot, setSelectedRobot] = useState<RobotResponse | null>(null);
+  const t = useTranslations('robots');
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['robots'],
@@ -220,30 +217,33 @@ export function RobotsClient() {
       {/* Filter tabs + Add button */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex gap-2">
-          {TYPES.map(({ key, label }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => handleTypeChange(key)}
-              className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
-                activeType === key
-                  ? 'bg-[var(--app-brand)] text-white'
-                  : 'border border-[var(--app-border)] text-[var(--app-muted)] hover:border-[var(--app-brand)] hover:text-[var(--app-brand-dark)]'
-              }`}
-            >
-              {label}
-              {!isLoading && (
-                <span className="ml-1.5 opacity-70">
-                  {key === 'ALL' ? all.length : all.filter((r) => r.robotType === key).length}
-                </span>
-              )}
-            </button>
-          ))}
+          {TYPE_KEYS.map((key) => {
+            const label = t(`types.${key === 'ALL' ? 'all' : key.toLowerCase()}`);
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => handleTypeChange(key)}
+                className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
+                  activeType === key
+                    ? 'bg-[var(--app-brand)] text-white'
+                    : 'border border-[var(--app-border)] text-[var(--app-muted)] hover:border-[var(--app-brand)] hover:text-[var(--app-brand-dark)]'
+                }`}
+              >
+                {label}
+                {!isLoading && (
+                  <span className="ml-1.5 opacity-70">
+                    {key === 'ALL' ? all.length : all.filter((r) => r.robotType === key).length}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
         <div className="flex items-center gap-3">
           {!isLoading && filtered.length > 0 && (
             <p className="text-sm text-[var(--app-muted)]">
-              {pageStart + 1}–{Math.min(pageStart + ITEMS_PER_PAGE, filtered.length)} of {filtered.length}
+              {t('pageRange', { start: pageStart + 1, end: Math.min(pageStart + ITEMS_PER_PAGE, filtered.length), total: filtered.length })}
             </p>
           )}
           <Link
@@ -251,7 +251,7 @@ export function RobotsClient() {
             className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--app-brand)] px-3 py-1.5 text-sm font-semibold text-white transition hover:opacity-90"
           >
             <Plus className="h-4 w-4" />
-            Add Robot
+            {t('addRobot')}
           </Link>
         </div>
       </div>
@@ -265,14 +265,14 @@ export function RobotsClient() {
 
       {isError && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
-          Failed to load robots. Please refresh the page.
+          {t('failedToLoad')}
         </div>
       )}
 
       {!isLoading && !isError && filtered.length === 0 && (
         <div className="rounded-xl border border-dashed border-[var(--app-border)] bg-[var(--app-panel)] py-16 text-center">
           <Bot className="mx-auto h-8 w-8 text-[var(--app-muted)]" />
-          <p className="mt-3 text-sm text-[var(--app-muted)]">No robots in this category yet.</p>
+          <p className="mt-3 text-sm text-[var(--app-muted)]">{t('noneInCategory')}</p>
         </div>
       )}
 
@@ -292,7 +292,7 @@ export function RobotsClient() {
                   </span>
                   <div className="flex-1 border-t border-[var(--app-border)]" />
                   <span className="shrink-0 text-xs text-[var(--app-muted)] opacity-60">
-                    {robots.length} {robots.length === 1 ? 'model' : 'models'}
+                    {t('modelCount', { count: robots.length })}
                   </span>
                 </div>
                 <div className="overflow-hidden rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] divide-y divide-[var(--app-border)]">

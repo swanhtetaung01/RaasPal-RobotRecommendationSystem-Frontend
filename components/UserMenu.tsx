@@ -9,20 +9,22 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { useAuthStore } from '@/store/auth';
-
-const menuItems = [
-  { label: 'Profile', detail: 'View account details', icon: UserCircle },
-  { label: 'Settings', detail: 'Preferences and workspace', icon: Settings },
-  { label: 'Access role', detail: 'RAASPAL_TEAM', icon: ShieldCheck },
-];
 
 export function UserMenu() {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { logout, user } = useAuthStore();
+  const t = useTranslations('userMenu');
+
+  const menuItems = [
+    { label: t('profile'), detail: t('profileDetail'), icon: UserCircle },
+    { label: t('settings'), detail: t('settingsDetail'), icon: Settings },
+    { label: t('accessRole'), detail: t('teamRole'), icon: ShieldCheck },
+  ];
 
   const handleLogout = useCallback(async () => {
     logout();
@@ -125,7 +127,7 @@ export function UserMenu() {
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10">
                   <LogOut className="h-4 w-4" />
                 </span>
-                Sign out
+                {t('signOut')}
               </button>
             </div>
           </motion.div>

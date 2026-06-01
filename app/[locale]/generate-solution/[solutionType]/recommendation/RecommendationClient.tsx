@@ -13,6 +13,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { recommendationApi } from '@/lib/api';
 import type { RecommendationItemResponse, RecommendationResponse } from '@/types/api';
@@ -24,10 +25,10 @@ import { ArrowLeft, BadgeCheck, Bot, ChevronRight, Loader2, Trophy } from 'lucid
 import { Link } from '@/i18n/navigation';
 import { useLocale } from 'next-intl';
 
-const rankMeta = [
-  { label: 'Best match', color: 'bg-amber-400/20 text-amber-600', icon: Trophy },
-  { label: '2nd option', color: 'bg-[var(--app-brand-soft)] text-[var(--app-brand-dark)]', icon: BadgeCheck },
-  { label: '3rd option', color: 'bg-[var(--app-faint)] text-[var(--app-muted)]', icon: Bot },
+const RANK_STYLES = [
+  { color: 'bg-amber-400/20 text-amber-600', icon: Trophy },
+  { color: 'bg-[var(--app-brand-soft)] text-[var(--app-brand-dark)]', icon: BadgeCheck },
+  { color: 'bg-[var(--app-faint)] text-[var(--app-muted)]', icon: Bot },
 ];
 
 interface RecommendationClientProps {
@@ -39,6 +40,7 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
   const router = useRouter();
   const searchParams = useSearchParams();
   const locale = useLocale();
+  const t = useTranslations('generateSolution.recommendation');
   const reqId = searchParams.get('reqId');
 
   const [recommendation, setRecommendation] = useState<RecommendationResponse | null>(null);
@@ -47,7 +49,7 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
 
   useEffect(() => {
     if (!reqId) {
-      setError('No requirement ID found. Please upload the survey file again.');
+      setError(t('noRequirementId'));
       setLoading(false);
       return;
     }
@@ -58,13 +60,13 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
         if (res.data.success) {
           setRecommendation(res.data.data);
         } else {
-          setError(res.data.message ?? 'Failed to generate recommendations');
+          setError(res.data.message ?? t('failedGenerate'));
         }
       })
       .catch((err: unknown) => {
         setError(
           (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-          'Something went wrong while generating recommendations',
+          t('errorGeneric'),
         );
       })
       .finally(() => setLoading(false));
@@ -85,9 +87,9 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
 
         <section className="flex min-w-0 flex-1 flex-col">
           <AppTopBar
-            eyebrow="Generate solution · Recommendations"
+            eyebrow={t('eyebrow')}
             searchPlaceholder="Search customers, sites, robot criteria"
-            title="Robot Recommendations"
+            title={t('title')}
           />
 
           <div className="mx-auto w-full max-w-3xl space-y-6 p-4 sm:p-6">
@@ -97,25 +99,22 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
               href={`/generate-solution/${solutionType}/upload`}
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to upload
+              {t('backToUpload')}
             </Link>
 
             {/* Header */}
             <div className="rounded-xl border border-[var(--app-border)] bg-[var(--app-hero)] p-6 text-white shadow-sm">
-              <p className="text-sm font-semibold uppercase text-cyan-100">Step 2 of 3 · Review recommendations</p>
-              <h2 className="mt-2 text-2xl font-bold">AI-Generated Robot Recommendations</h2>
-              <p className="mt-2 max-w-lg text-sm leading-6 text-white/70">
-                The AI compared the customer requirements against the verified robot catalog.
-                Select the best fit to generate the proposal.
-              </p>
+              <p className="text-sm font-semibold uppercase text-cyan-100">{t('step')}</p>
+              <h2 className="mt-2 text-2xl font-bold">{t('heading')}</h2>
+              <p className="mt-2 max-w-lg text-sm leading-6 text-white/70">{t('description')}</p>
             </div>
 
             {/* Loading */}
             {loading && (
               <div className="flex flex-col items-center gap-4 py-16">
                 <Loader2 className="h-10 w-10 animate-spin text-[var(--app-brand)]" />
-                <p className="font-semibold text-[var(--app-text)]">Generating recommendations…</p>
-                <p className="text-sm text-[var(--app-muted)]">AI is comparing requirements against the robot catalog</p>
+                <p className="font-semibold text-[var(--app-text)]">{t('loading')}</p>
+                <p className="text-sm text-[var(--app-muted)]">{t('loadingSub')}</p>
               </div>
             )}
 
@@ -132,11 +131,9 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
                 {/* AI summary */}
                 {recommendation.aiExplanation && (
                   <div className="rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5">
-                    <p className="mb-2 text-xs font-semibold uppercase text-[var(--app-muted)]">AI summary</p>
+                    <p className="mb-2 text-xs font-semibold uppercase text-[var(--app-muted)]">{t('aiSummary')}</p>
                     <p className="text-sm leading-6 text-[var(--app-text)]">{recommendation.aiExplanation}</p>
-                    <p className="mt-3 text-xs text-[var(--app-muted)] italic">
-                      Final selection requires RAASPAL team verification and site survey.
-                    </p>
+                    <p className="mt-3 text-xs text-[var(--app-muted)] italic">{t('verificationNote')}</p>
                   </div>
                 )}
 
@@ -146,8 +143,10 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
                     .slice()
                     .sort((a, b) => a.rankPosition - b.rankPosition)
                     .map((item) => {
-                      const meta = rankMeta[item.rankPosition - 1] ?? rankMeta[2];
-                      const RankIcon = meta.icon;
+                      const rankLabels = [t('rankBest'), t('rank2'), t('rank3')];
+                      const style = RANK_STYLES[item.rankPosition - 1] ?? RANK_STYLES[2];
+                      const label = rankLabels[item.rankPosition - 1] ?? rankLabels[2];
+                      const RankIcon = style.icon;
                       return (
                         <article
                           key={item.id}
@@ -155,14 +154,14 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
                         >
                           <div className="flex flex-wrap items-start justify-between gap-4">
                             <div className="flex items-start gap-4">
-                              <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${meta.color}`}>
+                              <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${style.color}`}>
                                 <RankIcon className="h-6 w-6" />
                               </span>
                               <div>
                                 <div className="flex flex-wrap items-center gap-2">
                                   <h3 className="text-lg font-bold text-[var(--app-text)]">{item.robot.model}</h3>
-                                  <Badge className={`text-xs font-semibold ${meta.color}`} variant="secondary">
-                                    {meta.label}
+                                  <Badge className={`text-xs font-semibold ${style.color}`} variant="secondary">
+                                    {label}
                                   </Badge>
                                 </div>
                                 <p className="mt-0.5 text-sm text-[var(--app-muted)]">{item.robot.brand}</p>
@@ -175,7 +174,7 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
                               size="sm"
                               type="button"
                             >
-                              Select this robot
+                              {t('selectRobot')}
                               <ChevronRight className="h-4 w-4" />
                             </Button>
                           </div>
@@ -187,13 +186,13 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
                           <div className="mt-4 grid gap-4 sm:grid-cols-2">
                             {item.whyRecommended && (
                               <div>
-                                <p className="mb-2 text-xs font-semibold uppercase text-emerald-600">Why recommended</p>
+                                <p className="mb-2 text-xs font-semibold uppercase text-emerald-600">{t('whyRecommended')}</p>
                                 <p className="text-sm leading-6 text-[var(--app-text)]">{item.whyRecommended}</p>
                               </div>
                             )}
                             {item.limitations && (
                               <div>
-                                <p className="mb-2 text-xs font-semibold uppercase text-amber-600">Limitations</p>
+                                <p className="mb-2 text-xs font-semibold uppercase text-amber-600">{t('limitations')}</p>
                                 <p className="text-sm leading-6 text-[var(--app-text)]">{item.limitations}</p>
                               </div>
                             )}

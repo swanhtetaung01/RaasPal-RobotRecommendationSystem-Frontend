@@ -191,6 +191,26 @@
           "handoff": "Staff pickup, customer PIN, elevator handoff"
         }
       },
+      "mowing": {
+        "eyebrow": "Mowing solution intake",
+        "title": "Solution for Mowing",
+        "kicker": "Mowing robot workflow",
+        "headline": "Enter mowing requirements to generate robot recommendations.",
+        "description": "Use this form when the customer needs autonomous mowing for lawns, parks, golf courses, or outdoor areas.",
+        "detailsTitle": "Mowing details",
+        "fields": {
+          "visitorVolume": "Area size",
+          "languages": "Terrain type",
+          "tasks": "Mowing tasks",
+          "location": "Operating location"
+        },
+        "placeholders": {
+          "visitorVolume": "5,000 sqm lawn",
+          "languages": "Flat grass, slopes",
+          "tasks": "Mowing, trimming, edge cutting",
+          "location": "Park, golf course, resort grounds"
+        }
+      },
       "concierge": {
         "eyebrow": "Factory solution intake",
         "title": "Solution for Factory",
@@ -230,16 +250,103 @@
     "preview": {
       "title": "Solution preview",
       "action": "Generate solution"
+    },
+    "upload": {
+      "eyebrow": "Generate solution · Upload",
+      "step": "Step 1 of 3 · Upload survey",
+      "backToTypes": "Back to solution types",
+      "dropFileBrowse": "Drop file here or browse",
+      "fileTypes": "PDF, Excel (.xlsx / .xls), PNG, JPG · Max 20 MB",
+      "removeFile": "Remove file",
+      "unsupportedFile": "Unsupported file type. Please upload PDF, Excel, PNG, or JPG.",
+      "generate": "Generate recommendations",
+      "uploading": "Uploading file…",
+      "extracting": "Extracting requirements…",
+      "done": "Done! Redirecting…",
+      "retry": "Retry",
+      "statusUploading": "Uploading file to RAAS PAL…",
+      "statusExtracting": "AI is extracting customer requirements…",
+      "disclaimer": "AI extraction requires RAASPAL verification before the proposal is sent to the customer."
+    },
+    "recommendation": {
+      "eyebrow": "Generate solution · Recommendations",
+      "title": "Robot Recommendations",
+      "step": "Step 2 of 3 · Review recommendations",
+      "heading": "AI-Generated Robot Recommendations",
+      "description": "The AI compared the customer requirements against the verified robot catalog. Select the best fit to generate the proposal.",
+      "backToUpload": "Back to upload",
+      "loading": "Generating recommendations…",
+      "loadingSub": "AI is comparing requirements against the robot catalog",
+      "noRequirementId": "No requirement ID found. Please upload the survey file again.",
+      "failedGenerate": "Failed to generate recommendations",
+      "errorGeneric": "Something went wrong while generating recommendations",
+      "aiSummary": "AI summary",
+      "verificationNote": "Final selection requires RAASPAL team verification and site survey.",
+      "selectRobot": "Select this robot",
+      "whyRecommended": "Why recommended",
+      "limitations": "Limitations",
+      "rankBest": "Best match",
+      "rank2": "2nd option",
+      "rank3": "3rd option"
+    },
+    "proposal": {
+      "eyebrow": "Generate solution · Proposal",
+      "title": "Generated Proposal",
+      "step": "Step 3 of 3 · Proposal",
+      "heading": "Customer Proposal",
+      "description": "The AI-generated proposal below is based on the selected robot and customer requirements. Review and verify before sending to the customer.",
+      "backToRecommendations": "Back to recommendations",
+      "loading": "Generating proposal…",
+      "loadingSub": "AI is preparing the customer proposal document",
+      "errorMissingData": "Missing recommendation or robot ID. Please start from the upload step.",
+      "failedGenerate": "Failed to generate proposal",
+      "errorGeneric": "Something went wrong while generating the proposal",
+      "downloadPdf": "Download PDF",
+      "preparingPdf": "Preparing PDF…",
+      "copyText": "Copy text",
+      "copied": "Copied!",
+      "print": "Print",
+      "noContent": "No content returned. The backend AI provider may need configuration.",
+      "verificationTitle": "⚠ RAASPAL Verification Required",
+      "verificationBody": "This proposal was AI-generated from customer requirements and the robot catalog. Final specifications, pricing, and site suitability must be confirmed by RAASPAL team and an on-site survey before presenting to the customer."
     }
   },
   "proposals": {
     "title": "Solutions",
     "new": "New Solution",
-    "empty": "No solutions yet"
+    "empty": "No solutions yet",
+    "loading": "Loading…",
+    "count": "{count, plural, one {# proposal} other {# proposals}}",
+    "failedToLoad": "Failed to load proposals. Please refresh the page.",
+    "generateFirst": "Generate a robot solution to produce your first proposal.",
+    "generateSolution": "Generate solution",
+    "newSolution": "New solution",
+    "view": "View",
+    "generated": "Generated {date}"
   },
   "robots": {
     "title": "Robot Catalog",
-    "empty": "No robots found"
+    "empty": "No robots found",
+    "addRobot": "Add Robot",
+    "failedToLoad": "Failed to load robots. Please refresh the page.",
+    "noneInCategory": "No robots in this category yet.",
+    "modelCount": "{count, plural, one {# model} other {# models}}",
+    "pageRange": "{start}–{end} of {total}",
+    "types": {
+      "all": "All",
+      "cleaning": "Cleaning",
+      "delivery": "Delivery",
+      "mowing": "Mowing"
+    }
+  },
+  "userMenu": {
+    "profile": "Profile",
+    "profileDetail": "View account details",
+    "settings": "Settings",
+    "settingsDetail": "Preferences and workspace",
+    "accessRole": "Access role",
+    "teamRole": "RAASPAL_TEAM",
+    "signOut": "Sign out"
   },
   "language": {
     "select": "Language",
