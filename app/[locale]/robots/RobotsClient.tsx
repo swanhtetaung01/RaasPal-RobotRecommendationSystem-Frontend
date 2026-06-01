@@ -13,6 +13,13 @@ import type { RobotResponse, RobotType } from '@/types/api';
 
 const ITEMS_PER_PAGE = 9;
 
+const BRAND_ALIASES: Record<string, string> = {
+  gs:  'gausium',
+  kn:  'keenon',
+  cn:  'cenobot',
+  cb:  'cenobot',
+};
+
 /* ─── Badges ──────────────────────────────────────────────────────────────── */
 
 function TypeBadge({ type }: { type: RobotType }) {
@@ -205,10 +212,13 @@ export function RobotsClient() {
   });
 
   const query = searchQuery.trim().toLowerCase();
+  const expanded = BRAND_ALIASES[query] ?? query;
   const searched = query
-    ? all.filter((r) =>
-        r.brand.toLowerCase().includes(query) || r.model.toLowerCase().includes(query),
-      )
+    ? all.filter((r) => {
+        const brand = r.brand.toLowerCase();
+        const model = r.model.toLowerCase();
+        return brand.includes(query) || model.includes(query) || brand.includes(expanded);
+      })
     : all;
 
   const filtered = activeType === 'ALL' ? searched : searched.filter((r) => r.robotType === activeType);
