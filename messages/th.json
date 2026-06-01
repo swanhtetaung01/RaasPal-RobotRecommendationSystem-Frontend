@@ -332,6 +332,9 @@
     "noneInCategory": "ยังไม่มีหุ่นยนต์ในหมวดนี้",
     "modelCount": "{count} รุ่น",
     "pageRange": "{start}–{end} จาก {total}",
+    "searchPlaceholder": "ค้นหาตามแบรนด์หรือรุ่น…",
+    "searchResults": "{count} ผลลัพธ์สำหรับ \"{query}\"",
+    "clearSearch": "ล้างการค้นหา",
     "types": {
       "all": "ทั้งหมด",
       "cleaning": "ทำความสะอาด",

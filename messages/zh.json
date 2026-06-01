@@ -332,6 +332,9 @@
     "noneInCategory": "该分类暂无机器人",
     "modelCount": "{count} 型号",
     "pageRange": "{start}–{end} / 共 {total}",
+    "searchPlaceholder": "按品牌或型号搜索…",
+    "searchResults": "\"{query}\" 的 {count} 个结果",
+    "clearSearch": "清除搜索",
     "types": {
       "all": "全部",
       "cleaning": "清洁",
