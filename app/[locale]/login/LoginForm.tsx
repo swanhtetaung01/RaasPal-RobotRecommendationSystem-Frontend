@@ -30,36 +30,49 @@ export function LoginForm({ locale }: LoginFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  async function attemptLogin() {
+    const res = await authApi.login({ email, password });
+    if (!res.data.success) throw new Error(res.data.message ?? 'Login failed');
+    return res.data.data;
+  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
-      const res = await authApi.login({ email, password });
-      if (!res.data.success) {
-        setError(res.data.message ?? 'Login failed');
-        return;
+      let result;
+      try {
+        result = await attemptLogin();
+      } catch (err: unknown) {
+        // No response = network error (cold start / timeout). Auto-retry once.
+        const hasResponse = !!(err as { response?: unknown })?.response;
+        if (!hasResponse) {
+          setError('Server is starting up, retrying…');
+          await new Promise((r) => setTimeout(r, 3000));
+          result = await attemptLogin();
+        } else {
+          throw err;
+        }
       }
 
-      const { accessToken, user } = res.data.data;
+      const { accessToken, user } = result;
 
-      // 1. Store in Zustand + localStorage
       login(accessToken, user);
 
-      // 2. Set httpOnly cookie via API route so proxy.ts can verify auth on SSR
       await fetch('/api/auth/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: accessToken }),
       });
 
-      // 4. Navigate to dashboard
       router.push('/', { locale });
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'Invalid email or password';
+      const hasResponse = !!(err as { response?: unknown })?.response;
+      const message = hasResponse
+        ? ((err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Invalid email or password')
+        : 'Server is unavailable. Please try again in a moment.';
       setError(message);
     } finally {
       setLoading(false);
