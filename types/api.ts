@@ -90,6 +90,8 @@ export interface RobotResponse {
   robotType: RobotType;
   testStatus: TestStatus;
   priceBand: BudgetBand;
+  rentalPrice: number | null;
+  sellingPrice: number | null;
   imageUrl: string | null;
   datasheetUrl: string | null;
   createdAt: string;
@@ -254,6 +256,8 @@ export interface RobotRequest {
   robotType: RobotType;
   testStatus?: TestStatus | null;
   priceBand?: BudgetBand | null;
+  rentalPrice?: number | null;
+  sellingPrice?: number | null;
   imageUrl?: string | null;
   datasheetUrl?: string | null;
   spec?: RobotSpecRequest | null;

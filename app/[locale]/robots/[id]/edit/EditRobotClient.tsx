@@ -234,6 +234,8 @@ export function EditRobotClient() {
   const [robotType, setRobotType] = useState<RobotType>('CLEANING');
   const [testStatus, setTestStatus] = useState<TestStatus>('PENDING');
   const [priceBand, setPriceBand] = useState<BudgetBand | ''>('');
+  const [rentalPrice, setRentalPrice] = useState('');
+  const [sellingPrice, setSellingPrice] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [datasheetUrl, setDatasheetUrl] = useState('');
   const [spec, setSpec] = useState<SpecState>({} as SpecState);
@@ -250,6 +252,8 @@ export function EditRobotClient() {
         setRobotType(robot.robotType);
         setTestStatus(robot.testStatus);
         setPriceBand(robot.priceBand ?? '');
+        setRentalPrice(robot.rentalPrice != null ? String(robot.rentalPrice) : '');
+        setSellingPrice(robot.sellingPrice != null ? String(robot.sellingPrice) : '');
         setImageUrl(robot.imageUrl ?? '');
         setDatasheetUrl(robot.datasheetUrl ?? '');
         setSpec(robotToSpec(robot));
@@ -266,6 +270,8 @@ export function EditRobotClient() {
       await robotApi.update(id, {
         brand, model, robotType, testStatus,
         priceBand: priceBand || null,
+        rentalPrice: numOrNull(rentalPrice),
+        sellingPrice: numOrNull(sellingPrice),
         imageUrl: strOrNull(imageUrl),
         datasheetUrl: strOrNull(datasheetUrl),
         spec: toSpecRequest(spec),
@@ -340,6 +346,16 @@ export function EditRobotClient() {
                 <option value="HIGH">High ($$$)</option>
                 <option value="PREMIUM">Premium ($$$$)</option>
               </select>
+            </Field>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Rental Price (฿ / month)">
+              <input className={inputCls} type="number" min="0" step="1" value={rentalPrice}
+                onChange={(e) => setRentalPrice(e.target.value)} placeholder="e.g. 35000" />
+            </Field>
+            <Field label="Selling Price (฿)">
+              <input className={inputCls} type="number" min="0" step="1" value={sellingPrice}
+                onChange={(e) => setSellingPrice(e.target.value)} placeholder="e.g. 450000" />
             </Field>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

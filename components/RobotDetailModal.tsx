@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
-import { Bot, Pencil, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Bot, Loader2, Pencil, Trash2, X } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
+import { authApi, robotApi } from '@/lib/api';
 import type { RobotResponse, RobotSpecResponse } from '@/types/api';
 
 /* ─── Helpers ─────────────────────────────────────────────────────────────── */
@@ -213,12 +215,33 @@ interface Props {
 
 export function RobotDetailModal({ robot, onClose }: Props) {
   const s = robot.spec;
+  const queryClient = useQueryClient();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
+
+  async function handleDelete() {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await authApi.verifyPassword(deletePassword);
+      await robotApi.delete(robot.id);
+      await queryClient.invalidateQueries({ queryKey: ['robots'] });
+      onClose();
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })
+        ?.response?.data?.message ?? 'Incorrect password';
+      setDeleteError(msg);
+      setDeleting(false);
+    }
+  }
 
   const typeBg: Record<string, string> = {
     CLEANING:  'bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400',
@@ -273,6 +296,16 @@ export function RobotDetailModal({ robot, onClose }: Props) {
                   {priceLabelMap[robot.priceBand] ?? robot.priceBand}
                 </span>
               )}
+              {robot.rentalPrice != null && (
+                <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
+                  Rent ฿{robot.rentalPrice.toLocaleString('en-US', { maximumFractionDigits: 0 })}/mo
+                </span>
+              )}
+              {robot.sellingPrice != null && (
+                <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-bold text-blue-700 dark:bg-blue-950/40 dark:text-blue-400">
+                  Buy ฿{robot.sellingPrice.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                </span>
+              )}
               <Link
                 href={`/robots/${robot.id}/edit`}
                 onClick={onClose}
@@ -281,6 +314,49 @@ export function RobotDetailModal({ robot, onClose }: Props) {
                 <Pencil className="h-3.5 w-3.5" />
                 Edit
               </Link>
+
+              {/* Delete */}
+              {!confirmDelete ? (
+                <button
+                  type="button"
+                  onClick={() => { setConfirmDelete(true); setDeletePassword(''); setDeleteError(null); }}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--app-border)] px-3 py-1.5 text-xs font-semibold text-[var(--app-muted)] transition hover:border-red-400 hover:text-red-500"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete
+                </button>
+              ) : (
+                <span className="inline-flex flex-wrap items-center gap-1.5">
+                  <input
+                    autoFocus
+                    type="password"
+                    placeholder="Your password"
+                    value={deletePassword}
+                    onChange={(e) => { setDeletePassword(e.target.value); setDeleteError(null); }}
+                    className="rounded-lg border border-red-300 bg-[var(--app-panel-alt)] px-2.5 py-1.5 text-xs text-[var(--app-text)] outline-none focus:border-red-500"
+                  />
+                  {deleteError && (
+                    <span className="text-xs font-semibold text-red-500">{deleteError}</span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={deleting || !deletePassword}
+                    className="inline-flex items-center gap-1 rounded-lg bg-red-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-600 disabled:opacity-50"
+                  >
+                    {deleting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+                    Confirm
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setConfirmDelete(false); setDeleteError(null); }}
+                    className="rounded-lg border border-[var(--app-border)] px-3 py-1.5 text-xs font-semibold text-[var(--app-muted)] transition hover:bg-[var(--app-faint)]"
+                  >
+                    Cancel
+                  </button>
+                </span>
+              )}
+
               <button
                 onClick={onClose}
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--app-muted)] transition hover:bg-[var(--app-faint)] hover:text-[var(--app-text)]"
