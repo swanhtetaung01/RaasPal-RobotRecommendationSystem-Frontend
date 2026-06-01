@@ -336,7 +336,7 @@ export function AddRobotClient() {
                 <select className={selectCls} value={robotType} onChange={(e) => setRobotType(e.target.value as RobotType)}>
                   <option value="CLEANING">Cleaning</option>
                   <option value="DELIVERY">Delivery</option>
-                  <option value="CONCIERGE">Concierge</option>
+                  <option value="MOWING">Mowing</option>
                 </select>
               </Field>
               <Field label="Test Status">
@@ -562,7 +562,7 @@ export function AddRobotClient() {
                 <select className={selectCls} value={importType} onChange={(e) => setImportType(e.target.value as RobotType)}>
                   <option value="CLEANING">Cleaning</option>
                   <option value="DELIVERY">Delivery</option>
-                  <option value="CONCIERGE">Concierge</option>
+                  <option value="MOWING">Mowing</option>
                 </select>
               </Field>
               <Field label="Test Status">

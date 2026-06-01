@@ -16,7 +16,7 @@ function TypeBadge({ type }: { type: RobotType }) {
   const styles: Record<RobotType, string> = {
     CLEANING:  'bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400',
     DELIVERY:  'bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-400',
-    CONCIERGE: 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400',
+    MOWING: 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400',
   };
   return (
     <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${styles[type]}`}>
@@ -184,7 +184,7 @@ const TYPES: Array<{ key: RobotType | 'ALL'; label: string }> = [
   { key: 'ALL',       label: 'All' },
   { key: 'CLEANING',  label: 'Cleaning' },
   { key: 'DELIVERY',  label: 'Delivery' },
-  { key: 'CONCIERGE', label: 'Concierge' },
+  { key: 'MOWING', label: 'Mowing' },
 ];
 
 /* ─── Main ────────────────────────────────────────────────────────────────── */
