@@ -34,11 +34,20 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
-      // Remove stale token — the proxy.ts will redirect to /login on the next navigation.
       localStorage.removeItem('raaspal_token');
     }
+
+    // No response = network error (cold start / timeout). Retry once automatically.
+    const isNetworkError = !error.response;
+    const alreadyRetried = error.config?._retried;
+    if (isNetworkError && !alreadyRetried && error.config) {
+      error.config._retried = true;
+      await new Promise((r) => setTimeout(r, 3000));
+      return api(error.config);
+    }
+
     return Promise.reject(error as Error);
   },
 );
@@ -109,6 +118,9 @@ export const authApi = {
 
   me: () =>
     api.get<ApiResponse<UserResponse>>('/api/v1/auth/me'),
+
+  verifyPassword: (password: string) =>
+    api.post<ApiResponse<void>>('/api/v1/auth/verify-password', { password }),
 };
 
 // File upload

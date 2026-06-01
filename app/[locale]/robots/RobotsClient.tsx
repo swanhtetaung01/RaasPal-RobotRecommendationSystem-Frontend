@@ -38,15 +38,28 @@ function StatusBadge({ status }: { status: RobotResponse['testStatus'] }) {
   );
 }
 
-function PriceBadge({ band }: { band: RobotResponse['priceBand'] }) {
-  const labels: Record<RobotResponse['priceBand'], string> = {
+function PriceBadge({ robot }: { robot: RobotResponse }) {
+  const bandLabels: Partial<Record<RobotResponse['priceBand'], string>> = {
     LOW: '$', MEDIUM: '$$', MODERATE: '$$', HIGH: '$$$', PREMIUM: '$$$$',
   };
-  return (
-    <span className="rounded-full bg-[var(--app-faint)] px-2.5 py-0.5 text-xs font-bold text-[var(--app-muted)]">
-      {labels[band]}
-    </span>
-  );
+  const fmt = (n: number) => '฿' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  if (robot.rentalPrice != null || robot.sellingPrice != null) {
+    return (
+      <span className="rounded-full bg-[var(--app-faint)] px-2.5 py-0.5 text-xs font-bold text-[var(--app-muted)]">
+        {robot.rentalPrice != null && `${fmt(robot.rentalPrice)}/mo`}
+        {robot.rentalPrice != null && robot.sellingPrice != null && ' · '}
+        {robot.sellingPrice != null && fmt(robot.sellingPrice)}
+      </span>
+    );
+  }
+  if (robot.priceBand) {
+    return (
+      <span className="rounded-full bg-[var(--app-faint)] px-2.5 py-0.5 text-xs font-bold text-[var(--app-muted)]">
+        {bandLabels[robot.priceBand] ?? robot.priceBand}
+      </span>
+    );
+  }
+  return null;
 }
 
 /* ─── Robot card ──────────────────────────────────────────────────────────── */
@@ -96,7 +109,7 @@ function RobotCard({ robot, onClick }: { robot: RobotResponse; onClick: () => vo
       {/* Tags */}
       <div className="mt-3 flex flex-wrap gap-2">
         <TypeBadge type={robot.robotType} />
-        <PriceBadge band={robot.priceBand} />
+        <PriceBadge robot={robot} />
         {navTags.map((tag) => (
           <span key={tag} className="rounded-full bg-[var(--app-faint)] px-2.5 py-0.5 text-xs font-semibold text-[var(--app-muted)]">
             {tag}
