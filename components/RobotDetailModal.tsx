@@ -246,7 +246,7 @@ export function RobotDetailModal({ robot, onClose }: Props) {
   const typeBg: Record<string, string> = {
     CLEANING:  'bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400',
     DELIVERY:  'bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-400',
-    CONCIERGE: 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400',
+    MOWING: 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400',
   };
 
   const statusBg: Record<string, string> = {

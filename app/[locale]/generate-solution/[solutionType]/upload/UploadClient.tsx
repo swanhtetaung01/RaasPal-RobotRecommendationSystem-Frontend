@@ -33,7 +33,7 @@ import { Link } from '@/i18n/navigation';
 const ROBOT_TYPE_MAP: Record<string, RobotType> = {
   cleaning: 'CLEANING',
   delivery: 'DELIVERY',
-  concierge: 'CONCIERGE',
+  mowing: 'MOWING',
 };
 
 const ACCEPT_TYPES = [

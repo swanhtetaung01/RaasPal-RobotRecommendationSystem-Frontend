@@ -65,7 +65,7 @@ export interface FileUploadResponse {
 
 /* ─── Requirements ────────────────────────────────────────────────────────── */
 
-export type RobotType = 'CLEANING' | 'DELIVERY' | 'CONCIERGE';
+export type RobotType = 'CLEANING' | 'DELIVERY' | 'MOWING';
 
 export interface RequirementResponse {
   id: string;
