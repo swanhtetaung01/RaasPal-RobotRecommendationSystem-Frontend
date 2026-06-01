@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { Bot, ClipboardList, FileText, Loader2, Plus } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { proposalApi } from '@/lib/api';
@@ -21,6 +22,7 @@ function StatusBadge({ status }: { status: GeneratedProposalResponse['status'] }
 }
 
 function ProposalCard({ proposal }: { proposal: GeneratedProposalResponse }) {
+  const t = useTranslations('proposals');
   const date = new Date(proposal.createdAt).toLocaleDateString('en-GB', {
     day: '2-digit',
     month: 'short',
@@ -35,7 +37,7 @@ function ProposalCard({ proposal }: { proposal: GeneratedProposalResponse }) {
         </span>
         <div>
           <p className="font-semibold text-[var(--app-text)]">{proposal.selectedRobotName}</p>
-          <p className="mt-0.5 text-xs text-[var(--app-muted)]">Generated {date}</p>
+          <p className="mt-0.5 text-xs text-[var(--app-muted)]">{t('generated', { date })}</p>
         </div>
       </div>
 
@@ -46,7 +48,7 @@ function ProposalCard({ proposal }: { proposal: GeneratedProposalResponse }) {
           href={`/proposals/${proposal.id}`}
         >
           <FileText className="h-3.5 w-3.5" />
-          View
+          {t('view')}
         </Link>
       </div>
     </article>
@@ -54,27 +56,27 @@ function ProposalCard({ proposal }: { proposal: GeneratedProposalResponse }) {
 }
 
 function EmptyState() {
+  const t = useTranslations('proposals');
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--app-border)] bg-[var(--app-panel)] py-20 text-center">
       <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--app-hero)] text-[var(--app-brand)]">
         <ClipboardList className="h-7 w-7" />
       </span>
-      <h3 className="mt-4 text-lg font-semibold text-[var(--app-text)]">No proposals yet</h3>
-      <p className="mt-1 max-w-xs text-sm text-[var(--app-muted)]">
-        Generate a robot solution to produce your first proposal.
-      </p>
+      <h3 className="mt-4 text-lg font-semibold text-[var(--app-text)]">{t('empty')}</h3>
+      <p className="mt-1 max-w-xs text-sm text-[var(--app-muted)]">{t('generateFirst')}</p>
       <Link
         className="mt-6 flex items-center gap-2 rounded-lg bg-[var(--app-brand)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--app-brand-dark)]"
         href="/generate-solution"
       >
         <Plus className="h-4 w-4" />
-        Generate solution
+        {t('generateSolution')}
       </Link>
     </div>
   );
 }
 
 export function ProposalsClient() {
+  const t = useTranslations('proposals');
   const { data, isLoading, isError } = useQuery({
     queryKey: ['proposals'],
     queryFn: () => proposalApi.getAll(0, 50).then((r) => r.data.data),
@@ -86,16 +88,14 @@ export function ProposalsClient() {
     <div className="space-y-4 p-4 sm:p-6">
       <div className="flex items-center justify-between">
         <p className="text-sm text-[var(--app-muted)]">
-          {isLoading
-            ? 'Loading…'
-            : `${data?.totalElements ?? 0} proposal${(data?.totalElements ?? 0) === 1 ? '' : 's'}`}
+          {isLoading ? t('loading') : t('count', { count: data?.totalElements ?? 0 })}
         </p>
         <Link
           className="flex items-center gap-2 rounded-lg bg-[var(--app-brand)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--app-brand-dark)]"
           href="/generate-solution"
         >
           <Plus className="h-4 w-4" />
-          New solution
+          {t('newSolution')}
         </Link>
       </div>
 
@@ -107,7 +107,7 @@ export function ProposalsClient() {
 
       {isError && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
-          Failed to load proposals. Please refresh the page.
+          {t('failedToLoad')}
         </div>
       )}
 

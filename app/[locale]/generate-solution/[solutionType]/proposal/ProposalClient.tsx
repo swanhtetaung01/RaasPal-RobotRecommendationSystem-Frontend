@@ -13,6 +13,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { proposalApi } from '@/lib/api';
 import type { GeneratedProposalResponse } from '@/types/api';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -38,6 +39,7 @@ interface ProposalClientProps {
 
 function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType'>) {
   const searchParams = useSearchParams();
+  const t = useTranslations('generateSolution.proposal');
   const recId = searchParams.get('recId');
   const robotId = searchParams.get('robotId');
 
@@ -49,7 +51,7 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
 
   useEffect(() => {
     if (!recId || !robotId) {
-      setError('Missing recommendation or robot ID. Please start from the upload step.');
+      setError(t('errorMissingData'));
       setLoading(false);
       return;
     }
@@ -60,13 +62,13 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
         if (res.data.success) {
           setProposal(res.data.data);
         } else {
-          setError(res.data.message ?? 'Failed to generate proposal');
+          setError(res.data.message ?? t('failedGenerate'));
         }
       })
       .catch((err: unknown) => {
         setError(
           (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-          'Something went wrong while generating the proposal',
+          t('errorGeneric'),
         );
       })
       .finally(() => setLoading(false));
@@ -96,9 +98,9 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
 
         <section className="flex min-w-0 flex-1 flex-col">
           <AppTopBar
-            eyebrow="Generate solution · Proposal"
+            eyebrow={t('eyebrow')}
             searchPlaceholder="Search customers, sites, robot criteria"
-            title="Generated Proposal"
+            title={t('title')}
           />
 
           <div className="mx-auto w-full max-w-3xl space-y-6 p-4 sm:p-6">
@@ -108,25 +110,22 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
               href={`/generate-solution/${solutionType}/recommendation`}
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to recommendations
+              {t('backToRecommendations')}
             </Link>
 
             {/* Header */}
             <div className="rounded-xl border border-[var(--app-border)] bg-[var(--app-hero)] p-6 text-white shadow-sm">
-              <p className="text-sm font-semibold uppercase text-cyan-100">Step 3 of 3 · Proposal</p>
-              <h2 className="mt-2 text-2xl font-bold">Customer Proposal</h2>
-              <p className="mt-2 max-w-lg text-sm leading-6 text-white/70">
-                The AI-generated proposal below is based on the selected robot and customer requirements.
-                Review and verify before sending to the customer.
-              </p>
+              <p className="text-sm font-semibold uppercase text-cyan-100">{t('step')}</p>
+              <h2 className="mt-2 text-2xl font-bold">{t('heading')}</h2>
+              <p className="mt-2 max-w-lg text-sm leading-6 text-white/70">{t('description')}</p>
             </div>
 
             {/* Loading */}
             {loading && (
               <div className="flex flex-col items-center gap-4 py-16">
                 <Loader2 className="h-10 w-10 animate-spin text-[var(--app-brand)]" />
-                <p className="font-semibold text-[var(--app-text)]">Generating proposal…</p>
-                <p className="text-sm text-[var(--app-muted)]">AI is preparing the customer proposal document</p>
+                <p className="font-semibold text-[var(--app-text)]">{t('loading')}</p>
+                <p className="text-sm text-[var(--app-muted)]">{t('loadingSub')}</p>
               </div>
             )}
 
@@ -176,12 +175,12 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
                     {downloading ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Preparing PDF…
+                        {t('preparingPdf')}
                       </>
                     ) : (
                       <>
                         <Download className="h-4 w-4" />
-                        Download PDF
+                        {t('downloadPdf')}
                       </>
                     )}
                   </Button>
@@ -194,12 +193,12 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
                     {copied ? (
                       <>
                         <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                        Copied!
+                        {t('copied')}
                       </>
                     ) : (
                       <>
                         <ClipboardCopy className="h-4 w-4" />
-                        Copy text
+                        {t('copyText')}
                       </>
                     )}
                   </Button>
@@ -210,7 +209,7 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
                     variant="outline"
                   >
                     <Printer className="h-4 w-4" />
-                    Print
+                    {t('print')}
                   </Button>
                 </div>
 
@@ -222,19 +221,15 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
                     </pre>
                   ) : (
                     <p className="text-sm italic text-[var(--app-muted)]">
-                      No content returned. The backend AI provider may need configuration.
+                      {t('noContent')}
                     </p>
                   )}
                 </div>
 
                 {/* Disclaimer */}
                 <div className="rounded-xl border border-amber-200/60 bg-amber-50/50 px-5 py-4 text-sm text-amber-700 dark:border-amber-900/30 dark:bg-amber-950/20 dark:text-amber-400">
-                  <p className="font-semibold">⚠ RAASPAL Verification Required</p>
-                  <p className="mt-1">
-                    This proposal was AI-generated from customer requirements and the robot catalog.
-                    Final specifications, pricing, and site suitability must be confirmed by RAASPAL
-                    team and an on-site survey before presenting to the customer.
-                  </p>
+                  <p className="font-semibold">{t('verificationTitle')}</p>
+                  <p className="mt-1">{t('verificationBody')}</p>
                 </div>
               </>
             )}
