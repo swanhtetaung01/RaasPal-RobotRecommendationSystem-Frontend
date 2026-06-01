@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Bot, ChevronLeft, ChevronRight, Loader2, Plus, Search, X } from 'lucide-react';
+import { Bot, ChevronLeft, ChevronRight, Loader2, Plus } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { robotApi } from '@/lib/api';
+import { AppSidebar } from '@/components/AppSidebar';
+import { AppTopBar } from '@/components/AppTopBar';
 import { RobotDetailModal } from '@/components/RobotDetailModal';
 import type { RobotResponse, RobotType } from '@/types/api';
 
@@ -225,29 +227,18 @@ export function RobotsClient() {
   }
 
   return (
-    <div className="space-y-5 p-4 sm:p-6">
-
-      {/* Search bar */}
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--app-muted)]" />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => handleSearch(e.target.value)}
-          placeholder={t('searchPlaceholder')}
-          className="h-10 w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-panel-alt)] pl-9 pr-9 text-sm text-[var(--app-text)] placeholder:text-[var(--app-muted)] outline-none focus:border-[var(--app-brand)] transition"
-        />
-        {searchQuery && (
-          <button
-            type="button"
-            onClick={() => handleSearch('')}
-            aria-label={t('clearSearch')}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-[var(--app-muted)] hover:text-[var(--app-text)]"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
-      </div>
+    <main className="min-h-dvh bg-[var(--app-bg)] text-[var(--app-text)] transition-colors">
+      <div className="flex min-h-dvh">
+        <AppSidebar />
+        <section className="flex min-w-0 flex-1 flex-col">
+          <AppTopBar
+            eyebrow="Catalog"
+            title={t('title')}
+            searchPlaceholder={t('searchPlaceholder')}
+            searchValue={searchQuery}
+            onSearchChange={handleSearch}
+          />
+          <div className="space-y-5 p-4 sm:p-6">
 
       {/* Filter tabs + Add button */}
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -358,5 +349,8 @@ export function RobotsClient() {
         <RobotDetailModal robot={selectedRobot} onClose={() => setSelectedRobot(null)} />
       )}
     </div>
+        </section>
+      </div>
+    </main>
   );
 }
