@@ -64,73 +64,49 @@ function PriceBadge({ robot }: { robot: RobotResponse }) {
   return null;
 }
 
-/* ─── Robot card ──────────────────────────────────────────────────────────── */
+/* ─── Robot row ───────────────────────────────────────────────────────────── */
 
-function RobotCard({ robot, onClick }: { robot: RobotResponse; onClick: () => void }) {
+function RobotRow({ robot, onClick }: { robot: RobotResponse; onClick: () => void }) {
   const s = robot.spec;
-
   const specs = [
-    s?.speedMs != null          && { label: 'Speed',    value: `${s.speedMs} m/s` },
-    s?.widthCleaningMm != null  && { label: 'Clean width', value: `${s.widthCleaningMm} mm` },
-    s?.batteryWorkTimeSweepHr != null && { label: 'Battery', value: `${s.batteryWorkTimeSweepHr} hr` },
-    s?.noiseLevelDb != null     && { label: 'Noise',    value: `${s.noiseLevelDb} dB` },
-    s?.robotWeightKg != null    && { label: 'Weight',   value: `${s.robotWeightKg} kg` },
-    s?.minimumPassableWidthMm != null && { label: 'Min aisle', value: `${s.minimumPassableWidthMm} mm` },
-  ].filter(Boolean) as { label: string; value: string }[];
-
-  const navTags = [
-    s?.navigationLidar2d  && 'LiDAR 2D',
-    s?.navigationLidar3d  && 'LiDAR 3D',
-    s?.navigationCameraVslam && 'vSLAM',
+    s?.speedMs != null             && `${s.speedMs} m/s`,
+    s?.batteryWorkTimeSweepHr != null && `${s.batteryWorkTimeSweepHr} hr`,
+    s?.widthCleaningMm != null     && `${s.widthCleaningMm} mm`,
   ].filter(Boolean) as string[];
 
   return (
-    <article onClick={onClick} className="flex flex-col rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5 shadow-sm transition cursor-pointer hover:-translate-y-0.5 hover:border-[var(--app-brand)] hover:shadow-md hover:shadow-[var(--app-brand-glow)]">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          {robot.imageUrl ? (
-            <img
-              src={robot.imageUrl}
-              alt={`${robot.brand} ${robot.model}`}
-              className="h-10 w-10 shrink-0 rounded-xl object-contain bg-[var(--app-faint)]"
-            />
-          ) : (
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--app-brand-soft)] text-[var(--app-brand-dark)]">
-              <Bot className="h-5 w-5" />
-            </span>
-          )}
-          <div>
-            <p className="font-bold text-[var(--app-text)]">{robot.brand}</p>
-            <p className="text-sm text-[var(--app-muted)]">{robot.model}</p>
-          </div>
-        </div>
-        <StatusBadge status={robot.testStatus} />
-      </div>
+    <div
+      onClick={onClick}
+      className="flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors hover:bg-[var(--app-faint)]"
+    >
+      {robot.imageUrl ? (
+        <img
+          src={robot.imageUrl}
+          alt={robot.model}
+          className="h-9 w-9 shrink-0 rounded-lg object-contain bg-[var(--app-faint)]"
+        />
+      ) : (
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--app-brand-soft)] text-[var(--app-brand-dark)]">
+          <Bot className="h-4 w-4" />
+        </span>
+      )}
 
-      {/* Tags */}
-      <div className="mt-3 flex flex-wrap gap-2">
+      <p className="w-44 shrink-0 truncate text-sm font-semibold text-[var(--app-text)]">{robot.model}</p>
+
+      <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
         <TypeBadge type={robot.robotType} />
+        <StatusBadge status={robot.testStatus} />
         <PriceBadge robot={robot} />
-        {navTags.map((tag) => (
-          <span key={tag} className="rounded-full bg-[var(--app-faint)] px-2.5 py-0.5 text-xs font-semibold text-[var(--app-muted)]">
-            {tag}
-          </span>
-        ))}
       </div>
 
-      {/* Key specs */}
       {specs.length > 0 && (
-        <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-[var(--app-border)] pt-4">
-          {specs.map(({ label, value }) => (
-            <div key={label}>
-              <p className="text-xs text-[var(--app-muted)]">{label}</p>
-              <p className="text-sm font-semibold text-[var(--app-text)]">{value}</p>
-            </div>
-          ))}
+        <div className="hidden lg:flex items-center gap-4 shrink-0 text-xs text-[var(--app-muted)]">
+          {specs.map((v) => <span key={v}>{v}</span>)}
         </div>
       )}
-    </article>
+
+      <ChevronRight className="ml-2 h-4 w-4 shrink-0 text-[var(--app-muted)] opacity-40" />
+    </div>
   );
 }
 
@@ -300,14 +276,35 @@ export function RobotsClient() {
         </div>
       )}
 
-      {/* Grid */}
-      {paginated.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {paginated.map((robot) => (
-            <RobotCard key={robot.id} robot={robot} onClick={() => setSelectedRobot(robot)} />
-          ))}
-        </div>
-      )}
+      {/* Brand groups */}
+      {paginated.length > 0 && (() => {
+        const groups = paginated.reduce<Record<string, RobotResponse[]>>((acc, robot) => {
+          (acc[robot.brand] ??= []).push(robot);
+          return acc;
+        }, {});
+        return (
+          <div className="space-y-5">
+            {Object.entries(groups).map(([brand, robots]) => (
+              <div key={brand} className="space-y-2">
+                <div className="flex items-center gap-3 px-1">
+                  <span className="shrink-0 text-xs font-bold uppercase tracking-widest text-[var(--app-muted)]">
+                    {brand}
+                  </span>
+                  <div className="flex-1 border-t border-[var(--app-border)]" />
+                  <span className="shrink-0 text-xs text-[var(--app-muted)] opacity-60">
+                    {robots.length} {robots.length === 1 ? 'model' : 'models'}
+                  </span>
+                </div>
+                <div className="overflow-hidden rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] divide-y divide-[var(--app-border)]">
+                  {robots.map((robot) => (
+                    <RobotRow key={robot.id} robot={robot} onClick={() => setSelectedRobot(robot)} />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
 
       {/* Pagination */}
       <Pagination
