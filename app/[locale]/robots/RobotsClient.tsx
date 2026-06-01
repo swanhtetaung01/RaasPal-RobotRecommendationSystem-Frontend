@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Bot, Loader2, Plus } from 'lucide-react';
+import { Bot, ChevronLeft, ChevronRight, Loader2, Plus } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { robotApi } from '@/lib/api';
 import { RobotDetailModal } from '@/components/RobotDetailModal';
 import type { RobotResponse, RobotType } from '@/types/api';
+
+const ITEMS_PER_PAGE = 9;
 
 /* ─── Badges ──────────────────────────────────────────────────────────────── */
 
@@ -132,6 +134,74 @@ function RobotCard({ robot, onClick }: { robot: RobotResponse; onClick: () => vo
   );
 }
 
+/* ─── Pagination ──────────────────────────────────────────────────────────── */
+
+function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+
+  const pages: (number | '…')[] = [];
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) pages.push(i);
+  } else if (currentPage <= 4) {
+    pages.push(1, 2, 3, 4, 5, '…', totalPages);
+  } else if (currentPage >= totalPages - 3) {
+    pages.push(1, '…', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+  } else {
+    pages.push(1, '…', currentPage - 1, currentPage, currentPage + 1, '…', totalPages);
+  }
+
+  const btn = 'inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm font-semibold transition';
+
+  return (
+    <div className="flex items-center justify-center gap-1 pt-2">
+      <button
+        type="button"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className={`${btn} border border-[var(--app-border)] text-[var(--app-muted)] hover:border-[var(--app-brand)] hover:text-[var(--app-brand-dark)] disabled:opacity-30 disabled:cursor-not-allowed`}
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+
+      {pages.map((p, i) =>
+        p === '…' ? (
+          <span key={`ellipsis-${i}`} className="px-1 text-sm text-[var(--app-muted)]">…</span>
+        ) : (
+          <button
+            key={p}
+            type="button"
+            onClick={() => onPageChange(p as number)}
+            className={`${btn} ${
+              p === currentPage
+                ? 'bg-[var(--app-brand)] text-white'
+                : 'border border-[var(--app-border)] text-[var(--app-muted)] hover:border-[var(--app-brand)] hover:text-[var(--app-brand-dark)]'
+            }`}
+          >
+            {p}
+          </button>
+        ),
+      )}
+
+      <button
+        type="button"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className={`${btn} border border-[var(--app-border)] text-[var(--app-muted)] hover:border-[var(--app-brand)] hover:text-[var(--app-brand-dark)] disabled:opacity-30 disabled:cursor-not-allowed`}
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
 /* ─── Filter tabs ─────────────────────────────────────────────────────────── */
 
 const TYPES: Array<{ key: RobotType | 'ALL'; label: string }> = [
@@ -145,15 +215,28 @@ const TYPES: Array<{ key: RobotType | 'ALL'; label: string }> = [
 
 export function RobotsClient() {
   const [activeType, setActiveType] = useState<RobotType | 'ALL'>('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedRobot, setSelectedRobot] = useState<RobotResponse | null>(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['robots'],
-    queryFn: () => robotApi.getAll(0, 100).then((r) => r.data.data),
+    queryFn: () => robotApi.getAll(0, 200).then((r) => r.data.data),
   });
 
-  const all = data?.content ?? [];
+  const all = [...(data?.content ?? [])].sort((a, b) => {
+    const brandCmp = a.brand.localeCompare(b.brand);
+    return brandCmp !== 0 ? brandCmp : a.model.localeCompare(b.model);
+  });
+
   const filtered = activeType === 'ALL' ? all : all.filter((r) => r.robotType === activeType);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const pageStart = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginated = filtered.slice(pageStart, pageStart + ITEMS_PER_PAGE);
+
+  function handleTypeChange(type: RobotType | 'ALL') {
+    setActiveType(type);
+    setCurrentPage(1);
+  }
 
   return (
     <div className="space-y-5 p-4 sm:p-6">
@@ -165,7 +248,7 @@ export function RobotsClient() {
             <button
               key={key}
               type="button"
-              onClick={() => setActiveType(key)}
+              onClick={() => handleTypeChange(key)}
               className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
                 activeType === key
                   ? 'bg-[var(--app-brand)] text-white'
@@ -182,9 +265,11 @@ export function RobotsClient() {
           ))}
         </div>
         <div className="flex items-center gap-3">
-          <p className="text-sm text-[var(--app-muted)]">
-            {isLoading ? 'Loading…' : `${filtered.length} robot${filtered.length === 1 ? '' : 's'}`}
-          </p>
+          {!isLoading && filtered.length > 0 && (
+            <p className="text-sm text-[var(--app-muted)]">
+              {pageStart + 1}–{Math.min(pageStart + ITEMS_PER_PAGE, filtered.length)} of {filtered.length}
+            </p>
+          )}
           <Link
             href="/robots/new"
             className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--app-brand)] px-3 py-1.5 text-sm font-semibold text-white transition hover:opacity-90"
@@ -216,13 +301,20 @@ export function RobotsClient() {
       )}
 
       {/* Grid */}
-      {filtered.length > 0 && (
+      {paginated.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((robot) => (
+          {paginated.map((robot) => (
             <RobotCard key={robot.id} robot={robot} onClick={() => setSelectedRobot(robot)} />
           ))}
         </div>
       )}
+
+      {/* Pagination */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
 
       {/* Detail modal */}
       {selectedRobot && (
