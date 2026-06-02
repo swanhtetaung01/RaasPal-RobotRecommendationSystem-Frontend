@@ -61,7 +61,7 @@ export async function exportProposalToPdf(proposal: GeneratedProposalResponse) {
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   rgb(doc, TEXT_MID);
-  doc.text(`Robot: ${proposal.selectedRobotName}`, MARGIN, y);
+  doc.text(`Proposal: ${proposal.title ?? 'N/A'}`, MARGIN, y);
   y += 6;
   doc.text(`Generated: ${date}`, MARGIN, y);
   y += 6;
@@ -75,7 +75,7 @@ export async function exportProposalToPdf(proposal: GeneratedProposalResponse) {
   y += 10;
 
   /* ── Proposal content ──────────────────────────────────────────────── */
-  const content = proposal.content ?? 'No content available.';
+  const content = proposal.proposalContent ?? 'No content available.';
   const lines = doc.splitTextToSize(content, CONTENT_W) as string[];
 
   doc.setFontSize(10);
@@ -134,6 +134,6 @@ export async function exportProposalToPdf(proposal: GeneratedProposalResponse) {
   }
 
   /* ── Save ──────────────────────────────────────────────────────────── */
-  const filename = `RAASPAL_Proposal_${proposal.selectedRobotName.replace(/\s+/g, '_')}_${date.replace(/\s/g, '-')}.pdf`;
+  const filename = `RAASPAL_Proposal_${(proposal.title ?? 'proposal').replace(/\s+/g, '_')}_${date.replace(/\s/g, '-')}.pdf`;
   doc.save(filename);
 }

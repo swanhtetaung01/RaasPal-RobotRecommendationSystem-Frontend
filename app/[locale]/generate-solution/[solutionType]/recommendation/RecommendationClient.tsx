@@ -366,7 +366,7 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
   function handleSelect(item: RecommendationItemResponse) {
     if (!recommendation) return;
     router.push(
-      `/generate-solution/${solutionType}/proposal?recId=${recommendation.id}&robotId=${item.robot.id}`,
+      `/generate-solution/${solutionType}/proposal?itemId=${item.id}&recId=${recommendation.id}`,
       { locale },
     );
   }

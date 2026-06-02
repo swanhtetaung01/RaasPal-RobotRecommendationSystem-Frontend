@@ -36,7 +36,7 @@ function ProposalCard({ proposal }: { proposal: GeneratedProposalResponse }) {
           <Bot className="h-5 w-5" />
         </span>
         <div>
-          <p className="font-semibold text-[var(--app-text)]">{proposal.selectedRobotName}</p>
+          <p className="font-semibold text-[var(--app-text)]">{proposal.title ?? 'Proposal'}</p>
           <p className="mt-0.5 text-xs text-[var(--app-muted)]">{t('generated', { date })}</p>
         </div>
       </div>
