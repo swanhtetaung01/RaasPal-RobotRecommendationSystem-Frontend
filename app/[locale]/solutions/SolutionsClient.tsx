@@ -27,11 +27,13 @@ function RecommendationCard({ rec }: { rec: RecommendationResponse }) {
   const topOption = rec.options?.[0];
   const robotName = topOption
     ? `${topOption.robot.brand} ${topOption.robot.model}`
-    : 'Awaiting results';
+    : rec.status === 'COMPLETED'
+      ? 'Robot recommendation'
+      : 'Processing…';
   const optionCount = rec.options?.length ?? 0;
 
   const solutionType = topOption?.robot.robotType?.toLowerCase() ?? 'cleaning';
-  const viewHref = `/generate-solution/${solutionType}/recommendation?recommendationId=${rec.id}`;
+  const viewHref = `/generate-solution/${solutionType}/recommendation?recId=${rec.id}`;
 
   return (
     <article className="flex flex-col gap-4 rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--app-brand)] hover:shadow-md hover:shadow-[var(--app-brand-glow)] sm:flex-row sm:items-center sm:justify-between">
