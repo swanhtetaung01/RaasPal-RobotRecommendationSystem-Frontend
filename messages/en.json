@@ -282,7 +282,7 @@
       "errorGeneric": "Something went wrong while generating recommendations",
       "aiSummary": "AI summary",
       "verificationNote": "Final selection requires RAASPAL team verification and site survey.",
-      "selectRobot": "Select this robot",
+      "selectRobot": "Generate Proposal",
       "whyRecommended": "Why recommended",
       "limitations": "Limitations",
       "rankBest": "Best match",

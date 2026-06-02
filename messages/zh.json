@@ -282,7 +282,7 @@
       "errorGeneric": "生成推荐时出现错误",
       "aiSummary": "AI 摘要",
       "verificationNote": "最终选择需经 RAASPAL 团队核实和现场勘查",
-      "selectRobot": "选择该机器人",
+      "selectRobot": "生成提案",
       "whyRecommended": "推荐原因",
       "limitations": "局限性",
       "rankBest": "最佳匹配",

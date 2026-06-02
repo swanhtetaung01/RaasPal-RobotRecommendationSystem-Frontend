@@ -20,7 +20,7 @@ import {
   ArrowLeft,
   BadgeCheck,
   Bot,
-  ChevronRight,
+  FileText,
   Lightbulb,
   Loader2,
   Trophy,
@@ -217,7 +217,7 @@ function RobotCard({
               type="button"
             >
               {t('selectRobot')}
-              <ChevronRight className="h-4 w-4" />
+              <FileText className="h-4 w-4" />
             </Button>
           </div>
         </div>
