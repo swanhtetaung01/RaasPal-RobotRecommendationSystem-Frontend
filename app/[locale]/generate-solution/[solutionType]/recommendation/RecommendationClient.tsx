@@ -325,34 +325,43 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
   const t = useTranslations('generateSolution.recommendation');
   const reqId = searchParams.get('reqId');
 
+  const recId = searchParams.get('recId');
+
   const [recommendation, setRecommendation] = useState<RecommendationResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!reqId) {
+    const catchErr = (err: unknown) => {
+      setError(
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+          t('errorGeneric'),
+      );
+    };
+
+    if (recId) {
+      recommendationApi
+        .getById(recId)
+        .then((res) => {
+          if (res.data.success) setRecommendation(res.data.data);
+          else setError(res.data.message ?? t('failedGenerate'));
+        })
+        .catch(catchErr)
+        .finally(() => setLoading(false));
+    } else if (reqId) {
+      recommendationApi
+        .generate(reqId)
+        .then((res) => {
+          if (res.data.success) setRecommendation(res.data.data);
+          else setError(res.data.message ?? t('failedGenerate'));
+        })
+        .catch(catchErr)
+        .finally(() => setLoading(false));
+    } else {
       setError(t('noRequirementId'));
       setLoading(false);
-      return;
     }
-
-    recommendationApi
-      .generate(reqId)
-      .then((res) => {
-        if (res.data.success) {
-          setRecommendation(res.data.data);
-        } else {
-          setError(res.data.message ?? t('failedGenerate'));
-        }
-      })
-      .catch((err: unknown) => {
-        setError(
-          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-            t('errorGeneric'),
-        );
-      })
-      .finally(() => setLoading(false));
-  }, [reqId]);
+  }, [reqId, recId]);
 
   function handleSelect(item: RecommendationItemResponse) {
     if (!recommendation) return;
