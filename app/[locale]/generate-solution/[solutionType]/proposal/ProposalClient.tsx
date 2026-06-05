@@ -24,13 +24,12 @@ import {
   ArrowLeft,
   CheckCircle2,
   ClipboardCopy,
-  Download,
   FileText,
   Loader2,
+  Presentation,
   Printer,
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
-import { exportProposalToPdf } from '@/lib/pdf-export';
 
 interface ProposalClientProps {
   locale: string;
@@ -40,8 +39,8 @@ interface ProposalClientProps {
 function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType'>) {
   const searchParams = useSearchParams();
   const t = useTranslations('generateSolution.proposal');
+  const itemId = searchParams.get('itemId');
   const recId = searchParams.get('recId');
-  const robotId = searchParams.get('robotId');
 
   const [proposal, setProposal] = useState<GeneratedProposalResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,14 +49,14 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
   const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
-    if (!recId || !robotId) {
+    if (!itemId) {
       setError(t('errorMissingData'));
       setLoading(false);
       return;
     }
 
     proposalApi
-      .generate({ recommendationId: recId, selectedRobotId: robotId })
+      .generate({ recommendationItemId: itemId })
       .then((res) => {
         if (res.data.success) {
           setProposal(res.data.data);
@@ -72,20 +71,28 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
         );
       })
       .finally(() => setLoading(false));
-  }, [recId, robotId]);
+  }, [itemId]);
 
   async function handleCopy() {
-    if (!proposal?.content) return;
-    await navigator.clipboard.writeText(proposal.content);
+    if (!proposal?.proposalContent) return;
+    await navigator.clipboard.writeText(proposal.proposalContent);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
-  async function handleDownloadPdf() {
+  async function handleDownloadPptx() {
     if (!proposal) return;
     setDownloading(true);
     try {
-      await exportProposalToPdf(proposal);
+      const res = await proposalApi.exportPptx(proposal.id);
+      const url = URL.createObjectURL(new Blob([res.data as BlobPart], {
+        type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `RAASPAL_Proposal_${(proposal.title ?? 'proposal').replace(/\s+/g, '_')}.pptx`;
+      a.click();
+      URL.revokeObjectURL(url);
     } finally {
       setDownloading(false);
     }
@@ -107,7 +114,7 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
             {/* Back link */}
             <Link
               className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--app-muted)] hover:text-[var(--app-brand-dark)]"
-              href={`/generate-solution/${solutionType}/recommendation`}
+              href={`/generate-solution/${solutionType}/recommendation${recId ? `?recId=${recId}` : ''}`}
             >
               <ArrowLeft className="h-4 w-4" />
               {t('backToRecommendations')}
@@ -146,7 +153,7 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
                       <FileText className="h-5 w-5" />
                     </span>
                     <div>
-                      <p className="font-semibold text-[var(--app-text)]">{proposal.selectedRobotName}</p>
+                      <p className="font-semibold text-[var(--app-text)]">{proposal.title ?? 'Proposal'}</p>
                       <p className="text-xs text-[var(--app-muted)]">
                         Generated {new Date(proposal.createdAt).toLocaleDateString()}
                       </p>
@@ -169,18 +176,18 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
                   <Button
                     className="gap-2 bg-[var(--app-brand)] text-white hover:bg-[var(--app-brand-dark)]"
                     disabled={downloading}
-                    onClick={handleDownloadPdf}
+                    onClick={handleDownloadPptx}
                     type="button"
                   >
                     {downloading ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        {t('preparingPdf')}
+                        {t('preparingPptx')}
                       </>
                     ) : (
                       <>
-                        <Download className="h-4 w-4" />
-                        {t('downloadPdf')}
+                        <Presentation className="h-4 w-4" />
+                        {t('downloadPptx')}
                       </>
                     )}
                   </Button>
@@ -215,9 +222,9 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
 
                 {/* Proposal body */}
                 <div className="rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] p-6">
-                  {proposal.content ? (
+                  {proposal.proposalContent ? (
                     <pre className="whitespace-pre-wrap font-sans text-sm leading-7 text-[var(--app-text)]">
-                      {proposal.content}
+                      {proposal.proposalContent}
                     </pre>
                   ) : (
                     <p className="text-sm italic text-[var(--app-muted)]">

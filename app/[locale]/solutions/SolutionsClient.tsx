@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Bot, ChevronRight, ClipboardList, Loader2, Plus } from 'lucide-react';
+import { Bot, ChevronRight, ClipboardList, FileText, Loader2, Plus } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { recommendationApi } from '@/lib/api';
 import type { RecommendationResponse } from '@/types/api';
@@ -55,16 +55,25 @@ function RecommendationCard({ rec }: { rec: RecommendationResponse }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 pl-[60px] sm:pl-0">
+      <div className="flex items-center gap-2 pl-[60px] sm:pl-0">
         <StatusBadge status={rec.status} />
         {rec.status === 'COMPLETED' && (
-          <Link
-            className="flex items-center gap-1 rounded-lg border border-[var(--app-border)] px-3 py-1.5 text-sm font-semibold text-[var(--app-muted)] transition hover:border-[var(--app-brand)] hover:text-[var(--app-brand-dark)]"
-            href={viewHref}
-          >
-            View
-            <ChevronRight className="h-3.5 w-3.5" />
-          </Link>
+          <>
+            <Link
+              className="flex items-center gap-1 rounded-lg border border-[var(--app-border)] px-3 py-1.5 text-sm font-semibold text-[var(--app-muted)] transition hover:border-[var(--app-brand)] hover:text-[var(--app-brand-dark)]"
+              href={viewHref}
+            >
+              View
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
+            <Link
+              className="flex items-center gap-1.5 rounded-lg bg-[var(--app-brand)] px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-[var(--app-brand-dark)]"
+              href={viewHref}
+            >
+              <FileText className="h-3.5 w-3.5" />
+              Generate Proposal
+            </Link>
+          </>
         )}
       </div>
     </article>

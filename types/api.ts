@@ -307,21 +307,22 @@ export interface RecommendationResponse {
 
 /* ─── Proposals ───────────────────────────────────────────────────────────── */
 
-export type ProposalStatus = 'DRAFT' | 'FINAL';
-
 export interface GenerateProposalRequest {
-  recommendationId: string;
-  selectedRobotId: string;
+  recommendationItemId: string;
+  proposalTemplateId?: string | null;
 }
 
 export interface GeneratedProposalResponse {
   id: string;
-  recommendationId: string;
-  selectedRobotId: string;
-  selectedRobotName: string;
-  content: string | null;
-  status: ProposalStatus;
-  generatedById: string;
+  recommendationId: string | null;
+  recommendationItemId: string | null;
+  requirementId: string | null;
+  proposalTemplateId: string | null;
+  title: string | null;
+  proposalContent: string | null;
+  contentFormat: string | null;
+  status: string;
+  generatedById: string | null;
   createdAt: string;
   updatedAt: string;
 }
