@@ -1,4 +1,4 @@
-/**
+   /**
  * app/layout.tsx  — root layout (minimal passthrough)
  *
  * In Next.js 16, when ALL pages live under app/[locale]/, the [locale] layout

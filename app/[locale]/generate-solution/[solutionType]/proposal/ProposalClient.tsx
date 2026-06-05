@@ -24,13 +24,12 @@ import {
   ArrowLeft,
   CheckCircle2,
   ClipboardCopy,
-  Download,
   FileText,
   Loader2,
+  Presentation,
   Printer,
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
-import { exportProposalToPdf } from '@/lib/pdf-export';
 
 interface ProposalClientProps {
   locale: string;
@@ -81,11 +80,19 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
     setTimeout(() => setCopied(false), 2000);
   }
 
-  async function handleDownloadPdf() {
+  async function handleDownloadPptx() {
     if (!proposal) return;
     setDownloading(true);
     try {
-      await exportProposalToPdf(proposal);
+      const res = await proposalApi.exportPptx(proposal.id);
+      const url = URL.createObjectURL(new Blob([res.data as BlobPart], {
+        type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `RAASPAL_Proposal_${(proposal.title ?? 'proposal').replace(/\s+/g, '_')}.pptx`;
+      a.click();
+      URL.revokeObjectURL(url);
     } finally {
       setDownloading(false);
     }
@@ -169,18 +176,18 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
                   <Button
                     className="gap-2 bg-[var(--app-brand)] text-white hover:bg-[var(--app-brand-dark)]"
                     disabled={downloading}
-                    onClick={handleDownloadPdf}
+                    onClick={handleDownloadPptx}
                     type="button"
                   >
                     {downloading ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        {t('preparingPdf')}
+                        {t('preparingPptx')}
                       </>
                     ) : (
                       <>
-                        <Download className="h-4 w-4" />
-                        {t('downloadPdf')}
+                        <Presentation className="h-4 w-4" />
+                        {t('downloadPptx')}
                       </>
                     )}
                   </Button>
