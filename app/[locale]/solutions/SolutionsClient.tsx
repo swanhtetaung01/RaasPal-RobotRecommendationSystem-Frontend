@@ -25,11 +25,12 @@ function RecommendationCard({ rec }: { rec: RecommendationResponse }) {
   });
 
   const topOption = rec.options?.[0];
-  const robotName = topOption
-    ? `${topOption.robot.brand} ${topOption.robot.model}`
-    : rec.status === 'COMPLETED'
-      ? 'Robot recommendation'
-      : 'Processing…';
+  const robotName = rec.name
+    ?? (topOption
+      ? `${topOption.robot.brand} ${topOption.robot.model}`
+      : rec.status === 'COMPLETED'
+        ? 'Robot recommendation'
+        : 'Processing…');
   const optionCount = rec.options?.length ?? 0;
 
   const solutionType = topOption?.robot.robotType?.toLowerCase() ?? 'cleaning';
