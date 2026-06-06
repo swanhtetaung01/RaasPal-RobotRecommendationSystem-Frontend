@@ -341,6 +341,9 @@
     }
   },
   "proposals": {
+    "eyebrow": "ประวัติ",
+    "pageTitle": "ข้อเสนอ",
+    "searchPlaceholder": "ค้นหาข้อเสนอ…",
     "title": "โซลูชันทั้งหมด",
     "new": "โซลูชันใหม่",
     "empty": "ยังไม่มีโซลูชัน",
@@ -359,6 +362,9 @@
     "delete": "ลบ"
   },
   "solutions": {
+    "eyebrow": "ประวัติ",
+    "pageTitle": "โซลูชัน",
+    "searchPlaceholder": "ค้นหาโซลูชัน…",
     "loading": "กำลังโหลด…",
     "count": "{count} โซลูชัน",
     "newSolution": "โซลูชันใหม่",

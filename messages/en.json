@@ -341,6 +341,9 @@
     }
   },
   "proposals": {
+    "eyebrow": "History",
+    "pageTitle": "Proposals",
+    "searchPlaceholder": "Search proposals…",
     "title": "Solutions",
     "new": "New Solution",
     "empty": "No solutions yet",
@@ -359,6 +362,9 @@
     "delete": "Delete"
   },
   "solutions": {
+    "eyebrow": "History",
+    "pageTitle": "Solutions",
+    "searchPlaceholder": "Search solutions…",
     "loading": "Loading…",
     "count": "{count, plural, one {# solution} other {# solutions}}",
     "newSolution": "New solution",
