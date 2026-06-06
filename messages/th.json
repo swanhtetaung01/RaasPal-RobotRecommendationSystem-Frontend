@@ -351,7 +351,27 @@
     "generateSolution": "สร้างโซลูชัน",
     "newSolution": "โซลูชันใหม่",
     "view": "ดู",
-    "generated": "สร้างเมื่อ {date}"
+    "generated": "สร้างเมื่อ {date}",
+    "proposalSuffix": "— ข้อเสนอ",
+    "untitled": "ข้อเสนอ",
+    "confirmDelete": "ใช่ ลบเลย",
+    "cancel": "ยกเลิก",
+    "delete": "ลบ"
+  },
+  "solutions": {
+    "loading": "กำลังโหลด…",
+    "count": "{count} โซลูชัน",
+    "newSolution": "โซลูชันใหม่",
+    "failedToLoad": "โหลดโซลูชันไม่สำเร็จ กรุณารีเฟรชหน้าเพจ",
+    "robotRecommendation": "คำแนะนำหุ่นยนต์",
+    "processing": "กำลังประมวลผล…",
+    "options": "{count} ตัวเลือก",
+    "fit": "ความเหมาะสม: {level}",
+    "view": "ดู",
+    "generateProposal": "สร้างข้อเสนอ",
+    "empty": "ยังไม่มีคำแนะนำ",
+    "emptyDesc": "อัปโหลดแบบสำรวจลูกค้าเพื่อสร้างคำแนะนำหุ่นยนต์แรกของคุณ",
+    "generateSolution": "สร้างโซลูชัน"
   },
   "robots": {
     "title": "แคตตาล็อกหุ่นยนต์",

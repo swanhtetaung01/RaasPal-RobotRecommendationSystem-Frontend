@@ -351,7 +351,27 @@
     "generateSolution": "Generate solution",
     "newSolution": "New solution",
     "view": "View",
-    "generated": "Generated {date}"
+    "generated": "Generated {date}",
+    "proposalSuffix": "— Proposal",
+    "untitled": "Proposal",
+    "confirmDelete": "Yes, delete",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "solutions": {
+    "loading": "Loading…",
+    "count": "{count, plural, one {# solution} other {# solutions}}",
+    "newSolution": "New solution",
+    "failedToLoad": "Failed to load solutions. Please refresh the page.",
+    "robotRecommendation": "Robot recommendation",
+    "processing": "Processing…",
+    "options": "{count, plural, one {# option} other {# options}}",
+    "fit": "Fit: {level}",
+    "view": "View",
+    "generateProposal": "Generate Proposal",
+    "empty": "No recommendations yet",
+    "emptyDesc": "Upload a customer survey to generate your first robot recommendation.",
+    "generateSolution": "Generate solution"
   },
   "robots": {
     "title": "Robot Catalog",
