@@ -296,6 +296,7 @@ export interface RecommendationItemResponse {
 
 export interface RecommendationResponse {
   id: string;
+  name: string | null;
   requirementId: string;
   status: RecommendationStatus;
   aiExplanation: string | null;
@@ -315,6 +316,7 @@ export interface GenerateProposalRequest {
 export interface GeneratedProposalResponse {
   id: string;
   recommendationId: string | null;
+  recommendationName: string | null;
   recommendationItemId: string | null;
   requirementId: string | null;
   proposalTemplateId: string | null;

@@ -63,6 +63,7 @@ type Stage = 'idle' | 'uploading' | 'extracting' | 'done' | 'error';
 export function UploadClient({ locale, solutionType, meta }: UploadClientProps) {
   const router = useRouter();
   const t = useTranslations('generateSolution.upload');
+  const [solutionName, setSolutionName] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [stage, setStage] = useState<Stage>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -92,6 +93,10 @@ export function UploadClient({ locale, solutionType, meta }: UploadClientProps) 
 
   const handleSubmit = useCallback(async () => {
     if (!file) return;
+    if (!solutionName.trim()) {
+      setErrorMsg(t('solutionNameRequired'));
+      return;
+    }
     setStage('uploading');
     setErrorMsg(null);
 
@@ -115,8 +120,9 @@ export function UploadClient({ locale, solutionType, meta }: UploadClientProps) 
 
       // Step 3: Navigate to recommendation page
       setTimeout(() => {
+        const name = encodeURIComponent(solutionName.trim());
         router.push(
-          `/generate-solution/${solutionType}/recommendation?reqId=${requirementId}`,
+          `/generate-solution/${solutionType}/recommendation?reqId=${requirementId}&solutionName=${name}`,
           { locale } as Parameters<typeof router.push>[1],
         );
       }, 800);
@@ -128,7 +134,7 @@ export function UploadClient({ locale, solutionType, meta }: UploadClientProps) 
       setErrorMsg(msg);
       setStage('error');
     }
-  }, [file, robotType, solutionType, locale, router]);
+  }, [file, solutionName, robotType, solutionType, locale, router, t]);
 
   const stageLabel: Record<Stage, string> = {
     idle: t('generate'),
@@ -165,6 +171,28 @@ export function UploadClient({ locale, solutionType, meta }: UploadClientProps) 
               <p className="text-sm font-semibold uppercase text-cyan-100">{t('step')}</p>
               <h2 className="mt-2 text-2xl font-bold">{meta.title}</h2>
               <p className="mt-2 max-w-lg text-sm leading-6 text-white/70">{meta.description}</p>
+            </div>
+
+            {/* Solution name */}
+            <div className="rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5">
+              <label
+                className="mb-2 block text-sm font-semibold text-[var(--app-text)]"
+                htmlFor="solution-name"
+              >
+                {t('solutionNameLabel')}
+                <span className="ml-1 text-red-500">*</span>
+              </label>
+              <input
+                autoComplete="off"
+                className="w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] px-4 py-2.5 text-sm text-[var(--app-text)] placeholder:text-[var(--app-muted)] focus:border-[var(--app-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--app-brand)]/20"
+                disabled={stage === 'uploading' || stage === 'extracting' || stage === 'done'}
+                id="solution-name"
+                maxLength={255}
+                onChange={(e) => setSolutionName(e.target.value)}
+                placeholder={t('solutionNamePlaceholder')}
+                type="text"
+                value={solutionName}
+              />
             </div>
 
             {/* Drop zone */}
@@ -250,7 +278,7 @@ export function UploadClient({ locale, solutionType, meta }: UploadClientProps) 
             {/* Submit */}
             <Button
               className="w-full bg-[var(--app-brand)] font-semibold text-white hover:bg-[var(--app-brand-dark)] disabled:opacity-50"
-              disabled={!file || stage === 'uploading' || stage === 'extracting' || stage === 'done'}
+              disabled={!file || !solutionName.trim() || stage === 'uploading' || stage === 'extracting' || stage === 'done'}
               onClick={handleSubmit}
               size="lg"
               type="button"

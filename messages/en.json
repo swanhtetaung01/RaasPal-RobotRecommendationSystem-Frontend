@@ -73,6 +73,32 @@
         "templateUpdated": "Recommendation report template updated",
         "specsVerified": "3 robot specs verified by team"
       }
+    },
+    "hero": {
+      "eyebrow": "Get started",
+      "title": "Generate a Robot Solution",
+      "description": "Upload a customer survey and let AI extract requirements, match robots from the catalog, and draft a ready-to-send proposal — in minutes.",
+      "cta": "Start here"
+    },
+    "howItWorks": {
+      "heading": "How it works",
+      "step1Title": "Upload customer survey",
+      "step1Description": "Upload an Excel, PDF, or image of the customer requirements form.",
+      "step2Title": "AI extracts requirements",
+      "step2Description": "Claude AI reads the survey and structures the customer requirements automatically.",
+      "step3Title": "Review robot recommendations",
+      "step3Description": "The AI compares requirements against the verified robot catalog and ranks the best options.",
+      "step4Title": "Generate the proposal",
+      "step4Description": "Select a robot option and the AI drafts a full customer proposal ready for review."
+    },
+    "quickAccess": {
+      "heading": "Quick access",
+      "solutionsLabel": "Solutions",
+      "solutionsDesc": "View all past recommendations",
+      "proposalsLabel": "Proposals",
+      "proposalsDesc": "Browse generated proposals",
+      "robotsLabel": "Robot Catalog",
+      "robotsDesc": "Manage the robot database"
     }
   },
   "generateSolution": {
@@ -266,7 +292,10 @@
       "retry": "Retry",
       "statusUploading": "Uploading file to RAAS PAL…",
       "statusExtracting": "AI is extracting customer requirements…",
-      "disclaimer": "AI extraction requires RAASPAL verification before the proposal is sent to the customer."
+      "disclaimer": "AI extraction requires RAASPAL verification before the proposal is sent to the customer.",
+      "solutionNameLabel": "Solution name",
+      "solutionNamePlaceholder": "e.g. ABC Mall Cleaning Project",
+      "solutionNameRequired": "Please enter a solution name before generating."
     },
     "recommendation": {
       "eyebrow": "Generate solution · Recommendations",

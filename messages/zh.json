@@ -73,6 +73,32 @@
         "templateUpdated": "推荐报告模板已更新",
         "specsVerified": "团队已验证 3 个机器人规格"
       }
+    },
+    "hero": {
+      "eyebrow": "开始使用",
+      "title": "生成机器人解决方案",
+      "description": "上传客户调查表，让 AI 提取需求、从目录中匹配机器人，并起草即发提案，仅需几分钟。",
+      "cta": "从这里开始"
+    },
+    "howItWorks": {
+      "heading": "操作流程",
+      "step1Title": "上传客户调查表",
+      "step1Description": "上传 Excel、PDF 或客户需求表的图片。",
+      "step2Title": "AI 提取需求",
+      "step2Description": "Claude AI 读取调查表并自动整理客户需求。",
+      "step3Title": "查看机器人推荐",
+      "step3Description": "AI 将需求与经过验证的机器人目录进行比对，并对最佳选项进行排名。",
+      "step4Title": "生成提案",
+      "step4Description": "选择机器人选项，AI 将起草完整的客户提案供审阅。"
+    },
+    "quickAccess": {
+      "heading": "快速访问",
+      "solutionsLabel": "解决方案",
+      "solutionsDesc": "查看所有历史推荐",
+      "proposalsLabel": "提案",
+      "proposalsDesc": "浏览已生成的提案",
+      "robotsLabel": "机器人目录",
+      "robotsDesc": "管理机器人数据库"
     }
   },
   "generateSolution": {
@@ -266,7 +292,10 @@
       "retry": "重试",
       "statusUploading": "正在上传文件到 RAAS PAL…",
       "statusExtracting": "AI 正在提取客户需求…",
-      "disclaimer": "AI 提取结果需经 RAASPAL 核实后才能发送给客户"
+      "disclaimer": "AI 提取结果需经 RAASPAL 核实后才能发送给客户",
+      "solutionNameLabel": "方案名称",
+      "solutionNamePlaceholder": "例：ABC 商场清洁项目",
+      "solutionNameRequired": "请在生成前输入方案名称"
     },
     "recommendation": {
       "eyebrow": "生成方案 · 推荐",

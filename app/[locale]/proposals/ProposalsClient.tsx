@@ -1,8 +1,9 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Bot, ClipboardList, FileText, Loader2, Plus } from 'lucide-react';
+import { Bot, ClipboardList, FileText, Loader2, Plus, Trash2 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { proposalApi } from '@/lib/api';
 import type { GeneratedProposalResponse } from '@/types/api';
@@ -21,8 +22,17 @@ function StatusBadge({ status }: { status: GeneratedProposalResponse['status'] }
   );
 }
 
-function ProposalCard({ proposal }: { proposal: GeneratedProposalResponse }) {
+function ProposalCard({
+  proposal,
+  onDelete,
+  isDeleting,
+}: {
+  proposal: GeneratedProposalResponse;
+  onDelete: () => void;
+  isDeleting: boolean;
+}) {
   const t = useTranslations('proposals');
+  const [confirming, setConfirming] = useState(false);
   const date = new Date(proposal.createdAt).toLocaleDateString('en-GB', {
     day: '2-digit',
     month: 'short',
@@ -36,12 +46,16 @@ function ProposalCard({ proposal }: { proposal: GeneratedProposalResponse }) {
           <Bot className="h-5 w-5" />
         </span>
         <div>
-          <p className="font-semibold text-[var(--app-text)]">{proposal.title ?? 'Proposal'}</p>
+          <p className="font-semibold text-[var(--app-text)]">
+            {proposal.recommendationName
+              ? `${proposal.recommendationName} — Proposal`
+              : (proposal.title ?? 'Proposal')}
+          </p>
           <p className="mt-0.5 text-xs text-[var(--app-muted)]">{t('generated', { date })}</p>
         </div>
       </div>
 
-      <div className="flex items-center gap-3 pl-[60px] sm:pl-0">
+      <div className="flex items-center gap-2 pl-[60px] sm:pl-0">
         <StatusBadge status={proposal.status} />
         <Link
           className="flex items-center gap-1.5 rounded-lg border border-[var(--app-border)] px-3 py-1.5 text-sm font-semibold text-[var(--app-muted)] transition hover:border-[var(--app-brand)] hover:text-[var(--app-brand-dark)]"
@@ -50,6 +64,36 @@ function ProposalCard({ proposal }: { proposal: GeneratedProposalResponse }) {
           <FileText className="h-3.5 w-3.5" />
           {t('view')}
         </Link>
+
+        {confirming ? (
+          <div className="flex items-center gap-1.5">
+            <button
+              className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+              disabled={isDeleting}
+              onClick={onDelete}
+              type="button"
+            >
+              {isDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Yes, delete'}
+            </button>
+            <button
+              className="rounded-lg border border-[var(--app-border)] px-3 py-1.5 text-sm font-semibold text-[var(--app-muted)] transition hover:border-[var(--app-brand)] hover:text-[var(--app-brand-dark)]"
+              disabled={isDeleting}
+              onClick={() => setConfirming(false)}
+              type="button"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            className="flex items-center gap-1.5 rounded-lg border border-[var(--app-border)] px-3 py-1.5 text-sm font-semibold text-[var(--app-muted)] transition hover:border-red-400 hover:text-red-500"
+            onClick={() => setConfirming(true)}
+            type="button"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Delete
+          </button>
+        )}
       </div>
     </article>
   );
@@ -77,9 +121,16 @@ function EmptyState() {
 
 export function ProposalsClient() {
   const t = useTranslations('proposals');
+  const queryClient = useQueryClient();
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['proposals'],
     queryFn: () => proposalApi.getAll(0, 50).then((r) => r.data.data),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => proposalApi.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['proposals'] }),
   });
 
   const proposals = data?.content ?? [];
@@ -116,7 +167,12 @@ export function ProposalsClient() {
       {proposals.length > 0 && (
         <div className="space-y-3">
           {proposals.map((proposal) => (
-            <ProposalCard key={proposal.id} proposal={proposal} />
+            <ProposalCard
+              key={proposal.id}
+              proposal={proposal}
+              onDelete={() => deleteMutation.mutate(proposal.id)}
+              isDeleting={deleteMutation.isPending && deleteMutation.variables === proposal.id}
+            />
           ))}
         </div>
       )}

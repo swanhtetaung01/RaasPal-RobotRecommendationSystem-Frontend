@@ -147,9 +147,10 @@ export const requirementApi = {
 
 // Recommendations
 export const recommendationApi = {
-  generate: (requirementId: string) =>
+  generate: (requirementId: string, body?: { name?: string; optionCount?: number }) =>
     api.post<ApiResponse<RecommendationResponse>>(
       `/api/v1/recommendations/generate/${requirementId}`,
+      body ?? {},
     ),
 
   getAll: (page = 0, size = 20) =>
@@ -172,4 +173,7 @@ export const proposalApi = {
 
   exportPptx: (id: string) =>
     api.get(`/api/v1/proposals/${id}/export/pptx`, { responseType: 'blob' }),
+
+  delete: (id: string) =>
+    api.delete<ApiResponse<void>>(`/api/v1/proposals/${id}`),
 };

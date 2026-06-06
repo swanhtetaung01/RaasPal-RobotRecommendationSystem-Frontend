@@ -324,8 +324,8 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
   const locale = useLocale();
   const t = useTranslations('generateSolution.recommendation');
   const reqId = searchParams.get('reqId');
-
   const recId = searchParams.get('recId');
+  const solutionName = searchParams.get('solutionName') ?? undefined;
 
   const [recommendation, setRecommendation] = useState<RecommendationResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -350,7 +350,7 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
         .finally(() => setLoading(false));
     } else if (reqId) {
       recommendationApi
-        .generate(reqId)
+        .generate(reqId, solutionName ? { name: solutionName } : undefined)
         .then((res) => {
           if (res.data.success) setRecommendation(res.data.data);
           else setError(res.data.message ?? t('failedGenerate'));
@@ -361,7 +361,7 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
       setError(t('noRequirementId'));
       setLoading(false);
     }
-  }, [reqId, recId]);
+  }, [reqId, recId, solutionName]);
 
   function handleSelect(item: RecommendationItemResponse) {
     if (!recommendation) return;
