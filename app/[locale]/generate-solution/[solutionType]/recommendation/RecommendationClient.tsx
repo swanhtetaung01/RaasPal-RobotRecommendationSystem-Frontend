@@ -280,16 +280,16 @@ function RobotCard({
       {/* ── Missing Information ── */}
       {missingLines.length > 0 && (
         <div className="border-t border-[var(--app-border)] px-5 py-4">
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700/50 dark:bg-amber-900/30">
             <div className="mb-3 flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-amber-600" />
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-600">
+              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
                 Missing Information
               </p>
             </div>
             <BulletList
               items={missingLines}
-              color="bg-amber-500"
+              color="bg-amber-500 dark:bg-amber-400"
             />
           </div>
         </div>

@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Tailwind v4: register class-based dark mode so dark: utilities respond
+   to the .dark class on <html>, not just the OS prefers-color-scheme query. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ─── Design tokens ──────────────────────────────────────────────────────────
    All colours live here as CSS custom properties so they can be overridden
    in a single place (e.g. for a light mode toggle later).
