@@ -359,7 +359,10 @@
     "untitled": "Proposal",
     "confirmDelete": "Yes, delete",
     "cancel": "Cancel",
-    "delete": "Delete"
+    "delete": "Delete",
+    "noResults": "No results found",
+    "noResultsDesc": "Try a different search term.",
+    "searchResults": "{count, plural, one {# result} other {# results}} for \"{query}\""
   },
   "solutions": {
     "eyebrow": "History",
@@ -377,7 +380,10 @@
     "generateProposal": "Generate Proposal",
     "empty": "No recommendations yet",
     "emptyDesc": "Upload a customer survey to generate your first robot recommendation.",
-    "generateSolution": "Generate solution"
+    "generateSolution": "Generate solution",
+    "noResults": "No results found",
+    "noResultsDesc": "Try a different search term.",
+    "searchResults": "{count, plural, one {# result} other {# results}} for \"{query}\""
   },
   "robots": {
     "title": "Robot Catalog",

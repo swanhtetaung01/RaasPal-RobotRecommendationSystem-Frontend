@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Bot, ClipboardList, FileText, Loader2, Plus, Trash2 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
+import { AppSidebar } from '@/components/AppSidebar';
+import { AppTopBar } from '@/components/AppTopBar';
 import { proposalApi } from '@/lib/api';
 import type { GeneratedProposalResponse } from '@/types/api';
 
@@ -99,22 +101,28 @@ function ProposalCard({
   );
 }
 
-function EmptyState() {
+function EmptyState({ filtered }: { filtered: boolean }) {
   const t = useTranslations('proposals');
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--app-border)] bg-[var(--app-panel)] py-20 text-center">
       <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--app-hero)] text-[var(--app-brand)]">
         <ClipboardList className="h-7 w-7" />
       </span>
-      <h3 className="mt-4 text-lg font-semibold text-[var(--app-text)]">{t('empty')}</h3>
-      <p className="mt-1 max-w-xs text-sm text-[var(--app-muted)]">{t('generateFirst')}</p>
-      <Link
-        className="mt-6 flex items-center gap-2 rounded-lg bg-[var(--app-brand)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--app-brand-dark)]"
-        href="/generate-solution"
-      >
-        <Plus className="h-4 w-4" />
-        {t('generateSolution')}
-      </Link>
+      <h3 className="mt-4 text-lg font-semibold text-[var(--app-text)]">
+        {filtered ? t('noResults') : t('empty')}
+      </h3>
+      <p className="mt-1 max-w-xs text-sm text-[var(--app-muted)]">
+        {filtered ? t('noResultsDesc') : t('generateFirst')}
+      </p>
+      {!filtered && (
+        <Link
+          className="mt-6 flex items-center gap-2 rounded-lg bg-[var(--app-brand)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--app-brand-dark)]"
+          href="/generate-solution"
+        >
+          <Plus className="h-4 w-4" />
+          {t('generateSolution')}
+        </Link>
+      )}
     </div>
   );
 }
@@ -122,10 +130,11 @@ function EmptyState() {
 export function ProposalsClient() {
   const t = useTranslations('proposals');
   const queryClient = useQueryClient();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['proposals'],
-    queryFn: () => proposalApi.getAll(0, 50).then((r) => r.data.data),
+    queryFn: () => proposalApi.getAll(0, 200).then((r) => r.data.data),
   });
 
   const deleteMutation = useMutation({
@@ -133,49 +142,77 @@ export function ProposalsClient() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['proposals'] }),
   });
 
-  const proposals = data?.content ?? [];
+  const all = data?.content ?? [];
+  const query = searchQuery.trim().toLowerCase();
+  const filtered = query
+    ? all.filter((p) => {
+        const name = (p.recommendationName ?? p.title ?? '').toLowerCase();
+        return name.includes(query);
+      })
+    : all;
 
   return (
-    <div className="space-y-4 p-4 sm:p-6">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-[var(--app-muted)]">
-          {isLoading ? t('loading') : t('count', { count: data?.totalElements ?? 0 })}
-        </p>
-        <Link
-          className="flex items-center gap-2 rounded-lg bg-[var(--app-brand)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--app-brand-dark)]"
-          href="/generate-solution"
-        >
-          <Plus className="h-4 w-4" />
-          {t('newSolution')}
-        </Link>
+    <main className="min-h-dvh bg-[var(--app-bg)] text-[var(--app-text)] transition-colors">
+      <div className="flex min-h-dvh">
+        <AppSidebar />
+        <section className="flex min-w-0 flex-1 flex-col">
+          <AppTopBar
+            eyebrow={t('eyebrow')}
+            title={t('pageTitle')}
+            searchPlaceholder={t('searchPlaceholder')}
+            searchValue={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+
+          <div className="space-y-4 p-4 sm:p-6">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-[var(--app-muted)]">
+                {isLoading
+                  ? t('loading')
+                  : query
+                    ? t('searchResults', { count: filtered.length, query: searchQuery })
+                    : t('count', { count: data?.totalElements ?? 0 })}
+              </p>
+              <Link
+                className="flex items-center gap-2 rounded-lg bg-[var(--app-brand)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--app-brand-dark)]"
+                href="/generate-solution"
+              >
+                <Plus className="h-4 w-4" />
+                {t('newSolution')}
+              </Link>
+            </div>
+
+            {isLoading && (
+              <div className="flex justify-center py-16">
+                <Loader2 className="h-7 w-7 animate-spin text-[var(--app-brand)]" />
+              </div>
+            )}
+
+            {isError && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
+                {t('failedToLoad')}
+              </div>
+            )}
+
+            {!isLoading && !isError && filtered.length === 0 && (
+              <EmptyState filtered={query.length > 0} />
+            )}
+
+            {filtered.length > 0 && (
+              <div className="space-y-3">
+                {filtered.map((proposal) => (
+                  <ProposalCard
+                    key={proposal.id}
+                    proposal={proposal}
+                    onDelete={() => deleteMutation.mutate(proposal.id)}
+                    isDeleting={deleteMutation.isPending && deleteMutation.variables === proposal.id}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
       </div>
-
-      {isLoading && (
-        <div className="flex justify-center py-16">
-          <Loader2 className="h-7 w-7 animate-spin text-[var(--app-brand)]" />
-        </div>
-      )}
-
-      {isError && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
-          {t('failedToLoad')}
-        </div>
-      )}
-
-      {!isLoading && !isError && proposals.length === 0 && <EmptyState />}
-
-      {proposals.length > 0 && (
-        <div className="space-y-3">
-          {proposals.map((proposal) => (
-            <ProposalCard
-              key={proposal.id}
-              proposal={proposal}
-              onDelete={() => deleteMutation.mutate(proposal.id)}
-              isDeleting={deleteMutation.isPending && deleteMutation.variables === proposal.id}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    </main>
   );
 }

@@ -359,7 +359,10 @@
     "untitled": "ข้อเสนอ",
     "confirmDelete": "ใช่ ลบเลย",
     "cancel": "ยกเลิก",
-    "delete": "ลบ"
+    "delete": "ลบ",
+    "noResults": "ไม่พบผลลัพธ์",
+    "noResultsDesc": "ลองใช้คำค้นหาอื่น",
+    "searchResults": "{count} ผลลัพธ์สำหรับ \"{query}\""
   },
   "solutions": {
     "eyebrow": "ประวัติ",
@@ -377,7 +380,10 @@
     "generateProposal": "สร้างข้อเสนอ",
     "empty": "ยังไม่มีคำแนะนำ",
     "emptyDesc": "อัปโหลดแบบสำรวจลูกค้าเพื่อสร้างคำแนะนำหุ่นยนต์แรกของคุณ",
-    "generateSolution": "สร้างโซลูชัน"
+    "generateSolution": "สร้างโซลูชัน",
+    "noResults": "ไม่พบผลลัพธ์",
+    "noResultsDesc": "ลองใช้คำค้นหาอื่น",
+    "searchResults": "{count} ผลลัพธ์สำหรับ \"{query}\""
   },
   "robots": {
     "title": "แคตตาล็อกหุ่นยนต์",
