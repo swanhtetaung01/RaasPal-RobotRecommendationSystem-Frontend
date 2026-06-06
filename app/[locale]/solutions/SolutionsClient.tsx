@@ -1,9 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Bot, ChevronRight, ClipboardList, FileText, Loader2, Plus } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
+import { AppSidebar } from '@/components/AppSidebar';
+import { AppTopBar } from '@/components/AppTopBar';
 import { recommendationApi } from '@/lib/api';
 import type { RecommendationResponse } from '@/types/api';
 
@@ -83,73 +86,114 @@ function RecommendationCard({ rec }: { rec: RecommendationResponse }) {
   );
 }
 
-function EmptyState() {
+function EmptyState({ filtered }: { filtered: boolean }) {
   const t = useTranslations('solutions');
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--app-border)] bg-[var(--app-panel)] py-20 text-center">
       <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--app-hero)] text-[var(--app-brand)]">
         <ClipboardList className="h-7 w-7" />
       </span>
-      <h3 className="mt-4 text-lg font-semibold text-[var(--app-text)]">{t('empty')}</h3>
-      <p className="mt-1 max-w-xs text-sm text-[var(--app-muted)]">{t('emptyDesc')}</p>
-      <Link
-        className="mt-6 flex items-center gap-2 rounded-lg bg-[var(--app-brand)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--app-brand-dark)]"
-        href="/generate-solution"
-      >
-        <Plus className="h-4 w-4" />
-        {t('generateSolution')}
-      </Link>
+      <h3 className="mt-4 text-lg font-semibold text-[var(--app-text)]">
+        {filtered ? t('noResults') : t('empty')}
+      </h3>
+      <p className="mt-1 max-w-xs text-sm text-[var(--app-muted)]">
+        {filtered ? t('noResultsDesc') : t('emptyDesc')}
+      </p>
+      {!filtered && (
+        <Link
+          className="mt-6 flex items-center gap-2 rounded-lg bg-[var(--app-brand)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--app-brand-dark)]"
+          href="/generate-solution"
+        >
+          <Plus className="h-4 w-4" />
+          {t('generateSolution')}
+        </Link>
+      )}
     </div>
   );
 }
 
 export function SolutionsClient() {
   const t = useTranslations('solutions');
+  const [searchQuery, setSearchQuery] = useState('');
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['recommendations'],
-    queryFn: () => recommendationApi.getAll(0, 50).then((r) => r.data.data),
+    queryFn: () => recommendationApi.getAll(0, 200).then((r) => r.data.data),
   });
 
-  const recommendations = data?.content ?? [];
+  const all = data?.content ?? [];
+  const query = searchQuery.trim().toLowerCase();
+  const filtered = query
+    ? all.filter((rec) => {
+        const name = (rec.name ?? '').toLowerCase();
+        const topOption = rec.options?.[0];
+        const brand = (topOption?.robot.brand ?? '').toLowerCase();
+        const model = (topOption?.robot.model ?? '').toLowerCase();
+        return name.includes(query) || brand.includes(query) || model.includes(query);
+      })
+    : all;
+
+  function handleSearch(q: string) {
+    setSearchQuery(q);
+  }
 
   return (
-    <div className="space-y-4 p-4 sm:p-6">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-[var(--app-muted)]">
-          {isLoading
-            ? t('loading')
-            : t('count', { count: data?.totalElements ?? 0 })}
-        </p>
-        <Link
-          className="flex items-center gap-2 rounded-lg bg-[var(--app-brand)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--app-brand-dark)]"
-          href="/generate-solution"
-        >
-          <Plus className="h-4 w-4" />
-          {t('newSolution')}
-        </Link>
+    <main className="min-h-dvh bg-[var(--app-bg)] text-[var(--app-text)] transition-colors">
+      <div className="flex min-h-dvh">
+        <AppSidebar />
+        <section className="flex min-w-0 flex-1 flex-col">
+          <AppTopBar
+            eyebrow={t('eyebrow')}
+            title={t('pageTitle')}
+            searchPlaceholder={t('searchPlaceholder')}
+            searchValue={searchQuery}
+            onSearchChange={handleSearch}
+          />
+
+          <div className="space-y-4 p-4 sm:p-6">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-[var(--app-muted)]">
+                {isLoading
+                  ? t('loading')
+                  : query
+                    ? t('searchResults', { count: filtered.length, query: searchQuery })
+                    : t('count', { count: data?.totalElements ?? 0 })}
+              </p>
+              <Link
+                className="flex items-center gap-2 rounded-lg bg-[var(--app-brand)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--app-brand-dark)]"
+                href="/generate-solution"
+              >
+                <Plus className="h-4 w-4" />
+                {t('newSolution')}
+              </Link>
+            </div>
+
+            {isLoading && (
+              <div className="flex justify-center py-16">
+                <Loader2 className="h-7 w-7 animate-spin text-[var(--app-brand)]" />
+              </div>
+            )}
+
+            {isError && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
+                {t('failedToLoad')}
+              </div>
+            )}
+
+            {!isLoading && !isError && filtered.length === 0 && (
+              <EmptyState filtered={query.length > 0} />
+            )}
+
+            {filtered.length > 0 && (
+              <div className="space-y-3">
+                {filtered.map((rec) => (
+                  <RecommendationCard key={rec.id} rec={rec} />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
       </div>
-
-      {isLoading && (
-        <div className="flex justify-center py-16">
-          <Loader2 className="h-7 w-7 animate-spin text-[var(--app-brand)]" />
-        </div>
-      )}
-
-      {isError && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
-          {t('failedToLoad')}
-        </div>
-      )}
-
-      {!isLoading && !isError && recommendations.length === 0 && <EmptyState />}
-
-      {recommendations.length > 0 && (
-        <div className="space-y-3">
-          {recommendations.map((rec) => (
-            <RecommendationCard key={rec.id} rec={rec} />
-          ))}
-        </div>
-      )}
-    </div>
+    </main>
   );
 }
