@@ -48,8 +48,8 @@ function ProposalCard({
         <div>
           <p className="font-semibold text-[var(--app-text)]">
             {proposal.recommendationName
-              ? `${proposal.recommendationName} — Proposal`
-              : (proposal.title ?? 'Proposal')}
+              ? `${proposal.recommendationName} ${t('proposalSuffix')}`
+              : (proposal.title ?? t('untitled'))}
           </p>
           <p className="mt-0.5 text-xs text-[var(--app-muted)]">{t('generated', { date })}</p>
         </div>
@@ -73,7 +73,7 @@ function ProposalCard({
               onClick={onDelete}
               type="button"
             >
-              {isDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Yes, delete'}
+              {isDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t('confirmDelete')}
             </button>
             <button
               className="rounded-lg border border-[var(--app-border)] px-3 py-1.5 text-sm font-semibold text-[var(--app-muted)] transition hover:border-[var(--app-brand)] hover:text-[var(--app-brand-dark)]"
@@ -81,7 +81,7 @@ function ProposalCard({
               onClick={() => setConfirming(false)}
               type="button"
             >
-              Cancel
+              {t('cancel')}
             </button>
           </div>
         ) : (
@@ -91,7 +91,7 @@ function ProposalCard({
             type="button"
           >
             <Trash2 className="h-3.5 w-3.5" />
-            Delete
+            {t('delete')}
           </button>
         )}
       </div>

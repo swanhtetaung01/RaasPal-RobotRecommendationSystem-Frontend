@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { Bot, ChevronRight, ClipboardList, FileText, Loader2, Plus } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { recommendationApi } from '@/lib/api';
@@ -20,6 +21,7 @@ function StatusBadge({ status }: { status: RecommendationResponse['status'] }) {
 }
 
 function RecommendationCard({ rec }: { rec: RecommendationResponse }) {
+  const t = useTranslations('solutions');
   const date = new Date(rec.createdAt).toLocaleDateString('en-GB', {
     day: '2-digit', month: 'short', year: 'numeric',
   });
@@ -29,8 +31,8 @@ function RecommendationCard({ rec }: { rec: RecommendationResponse }) {
     ?? (topOption
       ? `${topOption.robot.brand} ${topOption.robot.model}`
       : rec.status === 'COMPLETED'
-        ? 'Robot recommendation'
-        : 'Processing…');
+        ? t('robotRecommendation')
+        : t('processing'));
   const optionCount = rec.options?.length ?? 0;
 
   const solutionType = topOption?.robot.robotType?.toLowerCase() ?? 'cleaning';
@@ -45,12 +47,12 @@ function RecommendationCard({ rec }: { rec: RecommendationResponse }) {
         <div>
           <p className="font-semibold text-[var(--app-text)]">{robotName}</p>
           <p className="mt-0.5 text-xs text-[var(--app-muted)]">
-            {optionCount > 0 ? `${optionCount} option${optionCount === 1 ? '' : 's'} · ` : ''}
+            {optionCount > 0 ? `${t('options', { count: optionCount })} · ` : ''}
             {date}
           </p>
           {topOption?.fitLevel && (
             <p className="mt-1 text-xs font-medium text-[var(--app-brand-dark)]">
-              Fit: {topOption.fitLevel}
+              {t('fit', { level: topOption.fitLevel })}
             </p>
           )}
         </div>
@@ -64,7 +66,7 @@ function RecommendationCard({ rec }: { rec: RecommendationResponse }) {
               className="flex items-center gap-1 rounded-lg border border-[var(--app-border)] px-3 py-1.5 text-sm font-semibold text-[var(--app-muted)] transition hover:border-[var(--app-brand)] hover:text-[var(--app-brand-dark)]"
               href={viewHref}
             >
-              View
+              {t('view')}
               <ChevronRight className="h-3.5 w-3.5" />
             </Link>
             <Link
@@ -72,7 +74,7 @@ function RecommendationCard({ rec }: { rec: RecommendationResponse }) {
               href={viewHref}
             >
               <FileText className="h-3.5 w-3.5" />
-              Generate Proposal
+              {t('generateProposal')}
             </Link>
           </>
         )}
@@ -82,27 +84,27 @@ function RecommendationCard({ rec }: { rec: RecommendationResponse }) {
 }
 
 function EmptyState() {
+  const t = useTranslations('solutions');
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--app-border)] bg-[var(--app-panel)] py-20 text-center">
       <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--app-hero)] text-[var(--app-brand)]">
         <ClipboardList className="h-7 w-7" />
       </span>
-      <h3 className="mt-4 text-lg font-semibold text-[var(--app-text)]">No recommendations yet</h3>
-      <p className="mt-1 max-w-xs text-sm text-[var(--app-muted)]">
-        Upload a customer survey to generate your first robot recommendation.
-      </p>
+      <h3 className="mt-4 text-lg font-semibold text-[var(--app-text)]">{t('empty')}</h3>
+      <p className="mt-1 max-w-xs text-sm text-[var(--app-muted)]">{t('emptyDesc')}</p>
       <Link
         className="mt-6 flex items-center gap-2 rounded-lg bg-[var(--app-brand)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--app-brand-dark)]"
         href="/generate-solution"
       >
         <Plus className="h-4 w-4" />
-        Generate solution
+        {t('generateSolution')}
       </Link>
     </div>
   );
 }
 
 export function SolutionsClient() {
+  const t = useTranslations('solutions');
   const { data, isLoading, isError } = useQuery({
     queryKey: ['recommendations'],
     queryFn: () => recommendationApi.getAll(0, 50).then((r) => r.data.data),
@@ -115,15 +117,15 @@ export function SolutionsClient() {
       <div className="flex items-center justify-between">
         <p className="text-sm text-[var(--app-muted)]">
           {isLoading
-            ? 'Loading…'
-            : `${data?.totalElements ?? 0} recommendation${(data?.totalElements ?? 0) === 1 ? '' : 's'}`}
+            ? t('loading')
+            : t('count', { count: data?.totalElements ?? 0 })}
         </p>
         <Link
           className="flex items-center gap-2 rounded-lg bg-[var(--app-brand)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--app-brand-dark)]"
           href="/generate-solution"
         >
           <Plus className="h-4 w-4" />
-          New solution
+          {t('newSolution')}
         </Link>
       </div>
 
@@ -135,7 +137,7 @@ export function SolutionsClient() {
 
       {isError && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
-          Failed to load solutions. Please refresh the page.
+          {t('failedToLoad')}
         </div>
       )}
 

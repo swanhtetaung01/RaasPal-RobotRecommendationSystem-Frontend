@@ -351,7 +351,27 @@
     "generateSolution": "生成方案",
     "newSolution": "新建方案",
     "view": "查看",
-    "generated": "生成于 {date}"
+    "generated": "生成于 {date}",
+    "proposalSuffix": "— 提案",
+    "untitled": "提案",
+    "confirmDelete": "确认删除",
+    "cancel": "取消",
+    "delete": "删除"
+  },
+  "solutions": {
+    "loading": "加载中…",
+    "count": "{count} 个方案",
+    "newSolution": "新建方案",
+    "failedToLoad": "方案加载失败，请刷新页面",
+    "robotRecommendation": "机器人推荐",
+    "processing": "处理中…",
+    "options": "{count} 个选项",
+    "fit": "匹配度：{level}",
+    "view": "查看",
+    "generateProposal": "生成提案",
+    "empty": "暂无推荐记录",
+    "emptyDesc": "上传客户调查表以生成第一条机器人推荐",
+    "generateSolution": "生成方案"
   },
   "robots": {
     "title": "机器人目录",
