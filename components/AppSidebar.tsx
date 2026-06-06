@@ -39,7 +39,7 @@ export function AppSidebar() {
       <div className={`mb-8 flex items-center gap-3 px-2 ${collapsed ? 'justify-center' : ''}`}>
         <Image
           alt="RAAS PAL logo"
-          className={`${collapsed ? 'h-12 w-12' : 'h-14 w-14'} rounded-2xl object-contain shadow-lg shadow-[var(--app-brand-glow)] transition-[height,width]`}
+          className={`${collapsed ? 'h-12 w-12' : 'h-14 w-14'} rounded-2xl object-contain transition-[height,width] dark:shadow-lg dark:shadow-[var(--app-brand-glow)]`}
           height={56}
           priority
           src="/raas-pal-logo.png"
