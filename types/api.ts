@@ -334,7 +334,8 @@ export interface GeneratedProposalResponse {
 
 export interface CvteDeviceResponse {
   id: string;
-  deviceId: number;
+  /** String, not number — Kava device IDs exceed JS's safe integer range (see backend CvteDeviceResponse). */
+  deviceId: string;
   factorySn: string;
   deviceName: string | null;
   orgCode: string | null;
