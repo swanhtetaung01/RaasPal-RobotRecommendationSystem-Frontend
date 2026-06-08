@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Loader2, Radio, RefreshCw, Search } from 'lucide-react';
+import { Loader2, Radio, RefreshCw, Search, Zap } from 'lucide-react';
 import { cvteApi } from '@/lib/api';
 import { AppSidebar } from '@/components/AppSidebar';
 import { AppTopBar } from '@/components/AppTopBar';
@@ -14,6 +14,25 @@ import { Label } from '@/components/ui/label';
 import type { CvteDeviceResponse, CvteDeviceSyncRequest } from '@/types/api';
 
 const AUTO_REFRESH_MS = 45_000;
+
+function isCharging(runningState: string | null) {
+  return !!runningState && /charg/i.test(runningState);
+}
+
+/** Small battery glyph whose fill bar reflects the actual charge level (red/amber/green by range). */
+function BatteryGauge({ percentage }: { percentage: number }) {
+  const clamped = Math.max(0, Math.min(100, percentage));
+  const fillColor = clamped <= 20 ? '#ef4444' : clamped <= 50 ? '#f59e0b' : '#10b981';
+  const fillWidth = clamped <= 0 ? 0 : Math.max(1.5, (clamped / 100) * 12);
+
+  return (
+    <svg width="22" height="12" viewBox="0 0 22 12" className="shrink-0" aria-hidden>
+      <rect x="1" y="1" width="16" height="10" rx="2.5" fill="none" stroke="currentColor" strokeWidth="1.3" className="text-[var(--app-muted)]" />
+      <rect x="18.5" y="4" width="2.5" height="4" rx="1" fill="currentColor" className="text-[var(--app-muted)]" />
+      <rect x="3" y="3" width={fillWidth} height="6" rx="1" fill={fillColor} />
+    </svg>
+  );
+}
 
 function formatDateTime(value: string | null) {
   if (!value) return null;
@@ -122,7 +141,15 @@ function DeviceRow({ device, onPoll, isPolling }: { device: CvteDeviceResponse; 
       <td className="px-4 py-3"><CvteStatusBadge online={device.onlineStatus} /></td>
       <td className="px-4 py-3 text-sm text-[var(--app-text)]">{device.runningState ?? '—'}</td>
       <td className="px-4 py-3 text-sm text-[var(--app-text)]">
-        {device.batteryPercentage != null ? `${Math.round(device.batteryPercentage)}%` : '—'}
+        {device.batteryPercentage != null ? (
+          <span className="inline-flex items-center gap-1.5">
+            <BatteryGauge percentage={device.batteryPercentage} />
+            {isCharging(device.runningState) && <Zap className="h-3.5 w-3.5 text-emerald-500" />}
+            {Math.round(device.batteryPercentage)}%
+          </span>
+        ) : (
+          '—'
+        )}
       </td>
       <td className="px-4 py-3 text-xs text-[var(--app-muted)]">
         {lastChecked ?? t('neverChecked')}
@@ -167,7 +194,7 @@ export function CvteStatusClient() {
   });
 
   const pollOneMutation = useMutation({
-    mutationFn: (deviceId: number) => cvteApi.pollOne(deviceId),
+    mutationFn: (deviceId: string) => cvteApi.pollOne(deviceId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cvte-devices'] }),
   });
 

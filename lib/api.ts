@@ -191,6 +191,6 @@ export const cvteApi = {
   pollAll: () =>
     api.post<ApiResponse<CvteDeviceResponse[]>>('/api/v1/cvte/devices/poll-now'),
 
-  pollOne: (deviceId: number) =>
+  pollOne: (deviceId: string) =>
     api.post<ApiResponse<CvteDeviceResponse>>(`/api/v1/cvte/devices/${deviceId}/poll-now`),
 };
