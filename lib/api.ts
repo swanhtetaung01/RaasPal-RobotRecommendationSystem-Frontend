@@ -58,6 +58,8 @@ import type {
   ApiResponse,
   AuthResponse,
   CreateUserRequest,
+  CvteDeviceResponse,
+  CvteDeviceSyncRequest,
   FileUploadResponse,
   GenerateProposalRequest,
   GeneratedProposalResponse,
@@ -176,4 +178,19 @@ export const proposalApi = {
 
   delete: (id: string) =>
     api.delete<ApiResponse<void>>(`/api/v1/proposals/${id}`),
+};
+
+// CVTE C3 status (kept separate from robotApi — see [[CvteDevice]] on the backend)
+export const cvteApi = {
+  getAll: (page = 0, size = 100) =>
+    api.get<ApiResponse<PagedResponse<CvteDeviceResponse>>>('/api/v1/cvte/devices', { params: { page, size, sort: 'deviceName,asc' } }),
+
+  sync: (body: CvteDeviceSyncRequest) =>
+    api.post<ApiResponse<CvteDeviceResponse[]>>('/api/v1/cvte/devices/sync', body),
+
+  pollAll: () =>
+    api.post<ApiResponse<CvteDeviceResponse[]>>('/api/v1/cvte/devices/poll-now'),
+
+  pollOne: (deviceId: number) =>
+    api.post<ApiResponse<CvteDeviceResponse>>(`/api/v1/cvte/devices/${deviceId}/poll-now`),
 };

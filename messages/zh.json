@@ -8,6 +8,7 @@
     "proposals": "方案列表",
     "reports": "报告",
     "robots": "机器人",
+    "cvteStatus": "CVTE C3 状态",
     "users": "用户",
     "login": "登录",
     "logout": "退出",
@@ -99,6 +100,15 @@
       "proposalsDesc": "浏览已生成的提案",
       "robotsLabel": "机器人目录",
       "robotsDesc": "管理机器人数据库"
+    },
+    "cvteSummary": {
+      "heading": "机器人在线状态",
+      "viewAll": "查看全部",
+      "onlineCount": "{count} 在线",
+      "offlineCount": "{count} 离线",
+      "totalCount": "共追踪 {count} 台",
+      "empty": "尚未同步任何 CVTE 设备 — 前往「CVTE C3 状态」添加设备。",
+      "failedToLoad": "加载设备状态失败。"
     }
   },
   "generateSolution": {
@@ -401,6 +411,45 @@
       "cleaning": "清洁",
       "delivery": "配送",
       "mowing": "割草"
+    }
+  },
+  "cvte": {
+    "eyebrow": "机器人车队",
+    "title": "CVTE C3 状态",
+    "searchPlaceholder": "按名称或出厂编号搜索…",
+    "deviceCount": "正在追踪 {count} 台设备",
+    "refresh": "刷新",
+    "refreshing": "刷新中…",
+    "pollNow": "立即查询",
+    "neverChecked": "尚未检查",
+    "empty": "暂无设备。请按出厂编号、设备名称或机构代码同步以开始追踪。",
+    "failedToLoad": "加载设备失败,请刷新页面。",
+    "syncSuccess": "已从 Kava 同步 {count} 台设备。",
+    "syncError": "同步失败。请检查出厂编号、设备名称或机构代码后重试。",
+    "syncForm": {
+      "heading": "从 Kava 同步设备",
+      "description": "通过出厂编号、设备名称或机构代码在 Kava Open Gateway 中搜索,开始追踪匹配的设备。",
+      "factorySnLabel": "出厂编号",
+      "factorySnPlaceholder": "例如 C3X1234567",
+      "deviceNameLabel": "设备名称",
+      "deviceNamePlaceholder": "例如 Lobby Cleaner 01",
+      "orgCodeLabel": "机构代码",
+      "orgCodePlaceholder": "例如 RAASPAL",
+      "submit": "同步",
+      "syncing": "同步中…"
+    },
+    "table": {
+      "device": "设备",
+      "status": "状态",
+      "runningState": "运行状态",
+      "battery": "电量",
+      "lastChecked": "最近检查",
+      "actions": "操作"
+    },
+    "status": {
+      "online": "在线",
+      "offline": "离线",
+      "unknown": "未知"
     }
   },
   "userMenu": {

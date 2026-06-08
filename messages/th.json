@@ -8,6 +8,7 @@
     "proposals": "โซลูชันทั้งหมด",
     "reports": "รายงาน",
     "robots": "หุ่นยนต์",
+    "cvteStatus": "สถานะ CVTE C3",
     "users": "ผู้ใช้",
     "login": "เข้าสู่ระบบ",
     "logout": "ออกจากระบบ",
@@ -99,6 +100,15 @@
       "proposalsDesc": "เรียกดูข้อเสนอที่สร้างขึ้น",
       "robotsLabel": "แคตตาล็อกหุ่นยนต์",
       "robotsDesc": "จัดการฐานข้อมูลหุ่นยนต์"
+    },
+    "cvteSummary": {
+      "heading": "สถานะออนไลน์ของหุ่นยนต์",
+      "viewAll": "ดูทั้งหมด",
+      "onlineCount": "{count} ออนไลน์",
+      "offlineCount": "{count} ออฟไลน์",
+      "totalCount": "{count} เครื่องที่ติดตาม",
+      "empty": "ยังไม่มีอุปกรณ์ CVTE ที่ซิงค์ — ไปที่สถานะ CVTE C3 เพื่อเพิ่มอุปกรณ์",
+      "failedToLoad": "โหลดสถานะอุปกรณ์ไม่สำเร็จ"
     }
   },
   "generateSolution": {
@@ -401,6 +411,45 @@
       "cleaning": "ทำความสะอาด",
       "delivery": "จัดส่ง",
       "mowing": "ตัดหญ้า"
+    }
+  },
+  "cvte": {
+    "eyebrow": "กองยานหุ่นยนต์",
+    "title": "สถานะ CVTE C3",
+    "searchPlaceholder": "ค้นหาตามชื่อหรือ Factory SN…",
+    "deviceCount": "ติดตามอยู่ {count} เครื่อง",
+    "refresh": "รีเฟรช",
+    "refreshing": "กำลังรีเฟรช…",
+    "pollNow": "ตรวจสอบตอนนี้",
+    "neverChecked": "ยังไม่เคยตรวจสอบ",
+    "empty": "ยังไม่มีอุปกรณ์ ซิงค์ด้วย Factory SN ชื่ออุปกรณ์ หรือรหัสองค์กรเพื่อเริ่มต้น",
+    "failedToLoad": "โหลดอุปกรณ์ไม่สำเร็จ กรุณารีเฟรชหน้าเพจ",
+    "syncSuccess": "ซิงค์อุปกรณ์ {count} เครื่องจาก Kava สำเร็จ",
+    "syncError": "ซิงค์ไม่สำเร็จ ตรวจสอบ Factory SN ชื่ออุปกรณ์ หรือรหัสองค์กรแล้วลองอีกครั้ง",
+    "syncForm": {
+      "heading": "ซิงค์อุปกรณ์จาก Kava",
+      "description": "ค้นหาจาก Kava Open Gateway ด้วย Factory SN ชื่ออุปกรณ์ หรือรหัสองค์กร เพื่อเริ่มติดตามอุปกรณ์ที่ตรงกัน",
+      "factorySnLabel": "Factory SN",
+      "factorySnPlaceholder": "เช่น C3X1234567",
+      "deviceNameLabel": "ชื่ออุปกรณ์",
+      "deviceNamePlaceholder": "เช่น Lobby Cleaner 01",
+      "orgCodeLabel": "รหัสองค์กร",
+      "orgCodePlaceholder": "เช่น RAASPAL",
+      "submit": "ซิงค์",
+      "syncing": "กำลังซิงค์…"
+    },
+    "table": {
+      "device": "อุปกรณ์",
+      "status": "สถานะ",
+      "runningState": "สถานะการทำงาน",
+      "battery": "แบตเตอรี่",
+      "lastChecked": "ตรวจสอบล่าสุด",
+      "actions": "การดำเนินการ"
+    },
+    "status": {
+      "online": "ออนไลน์",
+      "offline": "ออฟไลน์",
+      "unknown": "ไม่ทราบ"
     }
   },
   "userMenu": {
