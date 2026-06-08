@@ -328,3 +328,25 @@ export interface GeneratedProposalResponse {
   createdAt: string;
   updatedAt: string;
 }
+
+/* ─── CVTE C3 status ──────────────────────────────────────────────────────── */
+/* Kept separate from Robot/RobotSpec — see [[CvteDevice]] on the backend. */
+
+export interface CvteDeviceResponse {
+  id: string;
+  deviceId: number;
+  factorySn: string;
+  deviceName: string | null;
+  orgCode: string | null;
+  onlineStatus: boolean | null;
+  runningState: string | null;
+  batteryPercentage: number | null;
+  lastCheckedAt: string | null;
+  lastMessage: string | null;
+}
+
+export interface CvteDeviceSyncRequest {
+  factorySn?: string;
+  deviceName?: string;
+  orgCode?: string;
+}

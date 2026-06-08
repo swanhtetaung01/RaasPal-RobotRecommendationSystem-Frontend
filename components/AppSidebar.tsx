@@ -7,6 +7,7 @@ import {
   ClipboardList,
   FileText,
   LayoutDashboard,
+  Radio,
   Sparkles,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -21,6 +22,7 @@ export const navigationItems = [
   { title: 'Solutions', labelKey: 'solutions', href: '/solutions', icon: Sparkles },
   { title: 'Proposals', labelKey: 'proposals', href: '/proposals', icon: FileText },
   { title: 'Robots', labelKey: 'robots', href: '/robots', icon: Bot },
+  { title: 'CVTE C3 Status', labelKey: 'cvteStatus', href: '/cvte', icon: Radio },
 ];
 
 export function AppSidebar() {

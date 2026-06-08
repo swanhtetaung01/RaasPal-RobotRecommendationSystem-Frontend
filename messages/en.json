@@ -8,6 +8,7 @@
     "proposals": "Proposals",
     "reports": "Reports",
     "robots": "Robots",
+    "cvteStatus": "CVTE C3 Status",
     "users": "Users",
     "login": "Login",
     "logout": "Logout",
@@ -99,6 +100,15 @@
       "proposalsDesc": "Browse generated proposals",
       "robotsLabel": "Robot Catalog",
       "robotsDesc": "Manage the robot database"
+    },
+    "cvteSummary": {
+      "heading": "Robot Online Status",
+      "viewAll": "View all",
+      "onlineCount": "{count} online",
+      "offlineCount": "{count} offline",
+      "totalCount": "{count} tracked",
+      "empty": "No CVTE devices synced yet — visit CVTE C3 Status to add some.",
+      "failedToLoad": "Failed to load device status."
     }
   },
   "generateSolution": {
@@ -401,6 +411,45 @@
       "cleaning": "Cleaning",
       "delivery": "Delivery",
       "mowing": "Mowing"
+    }
+  },
+  "cvte": {
+    "eyebrow": "Robot fleet",
+    "title": "CVTE C3 Status",
+    "searchPlaceholder": "Search by name or factory SN…",
+    "deviceCount": "{count, plural, one {# device} other {# devices}} tracked",
+    "refresh": "Refresh",
+    "refreshing": "Refreshing…",
+    "pollNow": "Poll now",
+    "neverChecked": "Not checked yet",
+    "empty": "No devices yet. Sync by factory SN, device name, or org code to get started.",
+    "failedToLoad": "Failed to load devices. Please refresh the page.",
+    "syncSuccess": "Synced {count, plural, one {# device} other {# devices}} from Kava.",
+    "syncError": "Sync failed. Check the factory SN, device name, or org code and try again.",
+    "syncForm": {
+      "heading": "Sync devices from Kava",
+      "description": "Search the Kava Open Gateway by factory SN, device name, or org code to start tracking matching devices.",
+      "factorySnLabel": "Factory SN",
+      "factorySnPlaceholder": "e.g. C3X1234567",
+      "deviceNameLabel": "Device name",
+      "deviceNamePlaceholder": "e.g. Lobby Cleaner 01",
+      "orgCodeLabel": "Org code",
+      "orgCodePlaceholder": "e.g. RAASPAL",
+      "submit": "Sync",
+      "syncing": "Syncing…"
+    },
+    "table": {
+      "device": "Device",
+      "status": "Status",
+      "runningState": "Running state",
+      "battery": "Battery",
+      "lastChecked": "Last checked",
+      "actions": "Actions"
+    },
+    "status": {
+      "online": "Online",
+      "offline": "Offline",
+      "unknown": "Unknown"
     }
   },
   "userMenu": {

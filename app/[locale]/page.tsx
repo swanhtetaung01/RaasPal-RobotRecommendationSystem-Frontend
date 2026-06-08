@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { Bot, ChevronRight, ClipboardList, FileText, Sparkles, Zap } from 'lucide-react';
 import { AppSidebar } from '@/components/AppSidebar';
 import { AppTopBar } from '@/components/AppTopBar';
+import { CvteStatusSummary } from '@/components/CvteStatusSummary';
 import { Link } from '@/i18n/navigation';
 
 export default async function LocaleHomePage() {
@@ -33,6 +34,9 @@ export default async function LocaleHomePage() {
           />
 
           <div className="mx-auto w-full max-w-4xl space-y-8 p-6">
+
+            {/* CVTE C3 status preview */}
+            <CvteStatusSummary />
 
             {/* Hero CTA */}
             <div className="relative overflow-hidden rounded-2xl bg-[var(--app-hero)] p-8 text-white shadow-lg">
