@@ -65,7 +65,6 @@ import type {
   GeneratedProposalResponse,
   LoginRequest,
   PagedResponse,
-  RecommendationItemResponse,
   RecommendationResponse,
   RequirementResponse,
   RobotImportResult,
@@ -73,6 +72,7 @@ import type {
   RobotResponse,
   RobotType,
   TestStatus,
+  TranslationResponse,
   UserResponse,
 } from '@/types/api';
 
@@ -178,6 +178,12 @@ export const proposalApi = {
 
   delete: (id: string) =>
     api.delete<ApiResponse<void>>(`/api/v1/proposals/${id}`),
+};
+
+// Translation
+export const translateApi = {
+  toThai: (texts: string[]) =>
+    api.post<ApiResponse<TranslationResponse>>('/api/v1/translate/thai', { texts }),
 };
 
 // CVTE C3 status (kept separate from robotApi — see [[CvteDevice]] on the backend)

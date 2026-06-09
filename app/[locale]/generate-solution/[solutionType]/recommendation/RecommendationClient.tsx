@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { recommendationApi } from '@/lib/api';
+import { recommendationApi, translateApi } from '@/lib/api';
 import type {
   RecommendationItemResponse,
   RecommendationResponse,
@@ -22,6 +22,7 @@ import {
   Bot,
   ChevronRight,
   FileText,
+  Languages,
   Lightbulb,
   Loader2,
   Sparkles,
@@ -42,6 +43,20 @@ const FIT_LEVEL_STYLE: Record<string, string> = {
   MEDIUM: 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400',
   LOW: 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400',
 };
+
+interface TranslatedOption {
+  customerSummaryLines: string[];
+  whyLines: string[];
+  limitationLines: string[];
+  businessValue: string | null;
+  missingLines: string[];
+  suggestedNextStep: string | null;
+}
+
+interface TranslatedData {
+  options: Record<string, TranslatedOption>;
+  aiExplanation: string | null;
+}
 
 /** Strip trailing artifacts left by AI list formatting, e.g. "; (" or ": (" before a sub-list number. */
 function cleanLine(s: string): string {
@@ -167,18 +182,20 @@ function RobotSummaryCard({
   item,
   rankLabels,
   onClick,
+  translated,
 }: {
   item: RecommendationItemResponse;
   rankLabels: string[];
   onClick: () => void;
+  translated?: TranslatedOption;
 }) {
   const style = RANK_STYLES[item.rankPosition - 1] ?? RANK_STYLES[2];
   const label = rankLabels[item.rankPosition - 1] ?? rankLabels[2];
   const RankIcon = style.icon;
   const fitKey = item.fitLevel?.toUpperCase() ?? '';
   const fitStyle = FIT_LEVEL_STYLE[fitKey] ?? null;
-  const summarySource = item.customerSummary || item.whyRecommended;
-  const summaryLines = summarySource ? parseIntoLines(summarySource) : [];
+  const summaryLines = translated?.customerSummaryLines
+    ?? (item.customerSummary || item.whyRecommended ? parseIntoLines(item.customerSummary || item.whyRecommended!) : []);
 
   return (
     <button
@@ -266,11 +283,13 @@ function RobotDetailModal({
   rankLabels,
   onClose,
   onSelect,
+  translated,
 }: {
   item: RecommendationItemResponse;
   rankLabels: string[];
   onClose: () => void;
   onSelect: () => void;
+  translated?: TranslatedOption;
 }) {
   const t = useTranslations('generateSolution.recommendation');
   const style = RANK_STYLES[item.rankPosition - 1] ?? RANK_STYLES[2];
@@ -279,9 +298,11 @@ function RobotDetailModal({
   const fitKey = item.fitLevel?.toUpperCase() ?? '';
   const fitStyle = FIT_LEVEL_STYLE[fitKey] ?? null;
   const specChips = item.robot.spec ? buildSpecChips(item.robot.spec) : [];
-  const whyLines = item.whyRecommended ? parseIntoLines(item.whyRecommended) : [];
-  const limitationLines = item.limitations ? parseIntoLines(item.limitations) : [];
-  const missingLines = item.missingInformation ? parseIntoLines(item.missingInformation) : [];
+  const whyLines = translated?.whyLines ?? (item.whyRecommended ? parseIntoLines(item.whyRecommended) : []);
+  const limitationLines = translated?.limitationLines ?? (item.limitations ? parseIntoLines(item.limitations) : []);
+  const missingLines = translated?.missingLines ?? (item.missingInformation ? parseIntoLines(item.missingInformation) : []);
+  const businessValue = translated?.businessValue ?? item.businessValue;
+  const suggestedNextStep = translated?.suggestedNextStep ?? item.suggestedNextStep;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -409,12 +430,12 @@ function RobotDetailModal({
           )}
 
           {/* Business Value */}
-          {item.businessValue && (
+          {businessValue && (
             <div className="border-t border-[var(--app-border)] px-5 py-4">
               <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--app-brand)]">
                 Business Value
               </p>
-              <p className="text-sm leading-5 text-[var(--app-text)]">{item.businessValue}</p>
+              <p className="text-sm leading-5 text-[var(--app-text)]">{businessValue}</p>
             </div>
           )}
 
@@ -434,7 +455,7 @@ function RobotDetailModal({
           )}
 
           {/* Suggested Next Step */}
-          {item.suggestedNextStep && (
+          {suggestedNextStep && (
             <div className="border-t border-[var(--app-border)] px-5 py-4">
               <div className="rounded-lg border border-[var(--app-brand-soft)] bg-[var(--app-brand-soft)]/20 p-4">
                 <div className="mb-2 flex items-center gap-2">
@@ -443,7 +464,7 @@ function RobotDetailModal({
                     Suggested Next Step
                   </p>
                 </div>
-                <p className="text-sm leading-5 text-[var(--app-text)]">{item.suggestedNextStep}</p>
+                <p className="text-sm leading-5 text-[var(--app-text)]">{suggestedNextStep}</p>
               </div>
             </div>
           )}
@@ -473,6 +494,8 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<RecommendationItemResponse | null>(null);
+  const [translatedData, setTranslatedData] = useState<TranslatedData | null>(null);
+  const [translating, setTranslating] = useState(false);
 
   useEffect(() => {
     const catchErr = (err: unknown) => {
@@ -505,6 +528,64 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
       setLoading(false);
     }
   }, [reqId, recId, solutionName]);
+
+  async function handleTranslate() {
+    if (!recommendation) return;
+    if (translatedData) { setTranslatedData(null); return; }
+
+    const texts: string[] = [];
+    const slots: Array<{ key: string; type: string; start: number; count: number }> = [];
+
+    function addSlot(key: string, type: string, items: string[]) {
+      if (!items.length) return;
+      slots.push({ key, type, start: texts.length, count: items.length });
+      texts.push(...items);
+    }
+
+    for (const item of recommendation.options) {
+      const summaryLines = parseIntoLines(item.customerSummary || item.whyRecommended || '');
+      addSlot(item.id, 'customerSummary', summaryLines);
+      const whyLines = item.whyRecommended ? parseIntoLines(item.whyRecommended) : [];
+      addSlot(item.id, 'why', whyLines);
+      const limitLines = item.limitations ? parseIntoLines(item.limitations) : [];
+      addSlot(item.id, 'limitations', limitLines);
+      if (item.businessValue) addSlot(item.id, 'businessValue', [item.businessValue]);
+      const missingLines = item.missingInformation ? parseIntoLines(item.missingInformation) : [];
+      addSlot(item.id, 'missing', missingLines);
+      if (item.suggestedNextStep) addSlot(item.id, 'nextStep', [item.suggestedNextStep]);
+    }
+    if (recommendation.aiExplanation) addSlot('__ai__', 'aiExplanation', [recommendation.aiExplanation]);
+
+    if (!texts.length) return;
+    setTranslating(true);
+    try {
+      const res = await translateApi.toThai(texts);
+      const tr = res.data.data.translations;
+      const result: TranslatedData = { options: {}, aiExplanation: null };
+      for (const slot of slots) {
+        const slice = tr.slice(slot.start, slot.start + slot.count);
+        if (slot.key === '__ai__') {
+          result.aiExplanation = slice[0] ?? null;
+        } else {
+          if (!result.options[slot.key]) {
+            result.options[slot.key] = { customerSummaryLines: [], whyLines: [], limitationLines: [], businessValue: null, missingLines: [], suggestedNextStep: null };
+          }
+          const o = result.options[slot.key];
+          if (slot.type === 'customerSummary') o.customerSummaryLines = slice;
+          else if (slot.type === 'why') o.whyLines = slice;
+          else if (slot.type === 'limitations') o.limitationLines = slice;
+          else if (slot.type === 'businessValue') o.businessValue = slice[0] ?? null;
+          else if (slot.type === 'missing') o.missingLines = slice;
+          else if (slot.type === 'nextStep') o.suggestedNextStep = slice[0] ?? null;
+        }
+      }
+      setTranslatedData(result);
+    } catch {
+      // silently fail — keep English content
+    } finally {
+      setTranslating(false);
+    }
+  }
 
   function handleSelect(item: RecommendationItemResponse) {
     if (!recommendation) return;
@@ -563,10 +644,25 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
             {/* Results */}
             {recommendation && !loading && (
               <>
-                {/* Instruction hint */}
-                <p className="text-center text-sm text-[var(--app-muted)]">
-                  Click any option to view full details and select it.
-                </p>
+                {/* Instruction hint + translate toggle */}
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-sm text-[var(--app-muted)]">
+                    Click any option to view full details and select it.
+                  </p>
+                  <Button
+                    className="gap-1.5 text-xs"
+                    disabled={translating}
+                    onClick={handleTranslate}
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    {translating
+                      ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      : <Languages className="h-3.5 w-3.5" />}
+                    {translatedData ? 'Back to English' : 'แปลเป็นภาษาไทย'}
+                  </Button>
+                </div>
 
                 {/* Comparison columns grid */}
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -579,6 +675,7 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
                         item={item}
                         onClick={() => setSelectedItem(item)}
                         rankLabels={rankLabels}
+                        translated={translatedData?.options[item.id]}
                       />
                     ))}
                 </div>
@@ -590,7 +687,7 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
                       {t('aiSummary')}
                     </p>
                     <p className="text-sm leading-6 text-[var(--app-text)]">
-                      {recommendation.aiExplanation}
+                      {translatedData?.aiExplanation ?? recommendation.aiExplanation}
                     </p>
                     <p className="mt-3 text-xs italic text-[var(--app-muted)]">
                       {t('verificationNote')}
@@ -610,6 +707,7 @@ function RecommendationInner({ solutionType }: Pick<RecommendationClientProps, '
           onClose={() => setSelectedItem(null)}
           onSelect={() => handleSelect(selectedItem)}
           rankLabels={rankLabels}
+          translated={translatedData?.options[selectedItem.id]}
         />
       )}
     </main>

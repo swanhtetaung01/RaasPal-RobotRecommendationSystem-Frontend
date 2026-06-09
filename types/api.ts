@@ -330,6 +330,16 @@ export interface GeneratedProposalResponse {
   updatedAt: string;
 }
 
+/* ─── Translation ─────────────────────────────────────────────────────────── */
+
+export interface TranslationRequest {
+  texts: string[];
+}
+
+export interface TranslationResponse {
+  translations: string[];
+}
+
 /* ─── CVTE C3 status ──────────────────────────────────────────────────────── */
 /* Kept separate from Robot/RobotSpec — see [[CvteDevice]] on the backend. */
 
