@@ -286,6 +286,7 @@ export interface RecommendationItemResponse {
   proposalTitle: string | null;
   proposalSummary: string | null;
   whyRecommended: string | null;
+  customerSummary: string | null;
   matchedRequirements: string | null;
   businessValue: string | null;
   limitations: string | null;
