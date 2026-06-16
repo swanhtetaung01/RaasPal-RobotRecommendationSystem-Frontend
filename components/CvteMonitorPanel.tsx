@@ -3,10 +3,8 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Loader2, Radio, RefreshCw, Search, Zap } from 'lucide-react';
+import { Loader2, Radio, RefreshCw, Search, X, Zap } from 'lucide-react';
 import { cvteApi } from '@/lib/api';
-import { AppSidebar } from '@/components/AppSidebar';
-import { AppTopBar } from '@/components/AppTopBar';
 import { CvteStatusBadge } from '@/components/CvteStatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -170,9 +168,14 @@ function DeviceRow({ device, onPoll, isPolling }: { device: CvteDeviceResponse; 
   );
 }
 
-/* ─── Main ────────────────────────────────────────────────────────────────── */
+/* ─── Panel ───────────────────────────────────────────────────────────────── */
 
-export function CvteStatusClient() {
+/**
+ * Self-contained CVTE C3 online/offline monitoring panel (sync form + live
+ * table + per-device poll). Owns its own search box so it can be embedded in a
+ * tab without depending on the page top bar.
+ */
+export function CvteMonitorPanel() {
   const t = useTranslations('cvte');
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
@@ -205,97 +208,102 @@ export function CvteStatusClient() {
     : all;
 
   return (
-    <main className="min-h-dvh bg-[var(--app-bg)] text-[var(--app-text)] transition-colors">
-      <div className="flex min-h-dvh">
-        <AppSidebar />
-        <section className="flex min-w-0 flex-1 flex-col">
-          <AppTopBar
-            eyebrow={t('eyebrow')}
-            title={t('title')}
-            searchPlaceholder={t('searchPlaceholder')}
-            searchValue={searchQuery}
-            onSearchChange={setSearchQuery}
+    <div className="space-y-5">
+      <SyncForm onSync={(filters) => syncMutation.mutate(filters)} isSyncing={syncMutation.isPending} />
+
+      {syncMutation.isError && (
+        <p className="text-sm text-red-600 dark:text-red-400">{t('syncError')}</p>
+      )}
+      {syncMutation.isSuccess && (
+        <p className="text-sm text-emerald-600 dark:text-emerald-400">
+          {t('syncSuccess', { count: syncMutation.data?.data.data?.length ?? 0 })}
+        </p>
+      )}
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="relative flex h-10 w-full max-w-xs items-center">
+          <Search className="pointer-events-none absolute left-3 h-4 w-4 shrink-0 text-[var(--app-muted)]" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t('searchPlaceholder')}
+            className="h-full w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-panel-alt)] pl-9 pr-8 text-sm text-[var(--app-text)] placeholder:text-[var(--app-muted)] outline-none focus:border-[var(--app-brand)] transition"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 rounded p-0.5 text-[var(--app-muted)] hover:text-[var(--app-text)]"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
 
-          <div className="space-y-5 p-4 sm:p-6">
-            <SyncForm onSync={(filters) => syncMutation.mutate(filters)} isSyncing={syncMutation.isPending} />
-
-            {syncMutation.isError && (
-              <p className="text-sm text-red-600 dark:text-red-400">{t('syncError')}</p>
+        <div className="flex items-center gap-3">
+          <p className="text-sm text-[var(--app-muted)]">{t('deviceCount', { count: filtered.length })}</p>
+          <button
+            type="button"
+            onClick={() => pollAllMutation.mutate()}
+            disabled={pollAllMutation.isPending || all.length === 0}
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--app-border)] px-3 py-1.5 text-sm font-semibold text-[var(--app-muted)] transition hover:border-[var(--app-brand)] hover:text-[var(--app-brand-dark)] disabled:opacity-50"
+          >
+            {pollAllMutation.isPending || isFetching ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
             )}
-            {syncMutation.isSuccess && (
-              <p className="text-sm text-emerald-600 dark:text-emerald-400">
-                {t('syncSuccess', { count: syncMutation.data?.data.data?.length ?? 0 })}
-              </p>
-            )}
-
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-[var(--app-muted)]">
-                {t('deviceCount', { count: filtered.length })}
-              </p>
-              <button
-                type="button"
-                onClick={() => pollAllMutation.mutate()}
-                disabled={pollAllMutation.isPending || all.length === 0}
-                className="inline-flex items-center gap-2 rounded-lg border border-[var(--app-border)] px-3 py-1.5 text-sm font-semibold text-[var(--app-muted)] transition hover:border-[var(--app-brand)] hover:text-[var(--app-brand-dark)] disabled:opacity-50"
-              >
-                {pollAllMutation.isPending || isFetching ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4" />
-                )}
-                {pollAllMutation.isPending ? t('refreshing') : t('refresh')}
-              </button>
-            </div>
-
-            {isLoading && (
-              <div className="flex justify-center py-16">
-                <Loader2 className="h-7 w-7 animate-spin text-[var(--app-brand)]" />
-              </div>
-            )}
-
-            {isError && (
-              <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
-                {t('failedToLoad')}
-              </div>
-            )}
-
-            {!isLoading && !isError && filtered.length === 0 && (
-              <div className="rounded-xl border border-dashed border-[var(--app-border)] bg-[var(--app-panel)] py-16 text-center">
-                <Radio className="mx-auto h-8 w-8 text-[var(--app-muted)]" />
-                <p className="mt-3 text-sm text-[var(--app-muted)]">{t('empty')}</p>
-              </div>
-            )}
-
-            {filtered.length > 0 && (
-              <div className="overflow-x-auto rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)]">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b border-[var(--app-border)] text-xs font-semibold uppercase tracking-wider text-[var(--app-muted)]">
-                      <th className="px-4 py-3">{t('table.device')}</th>
-                      <th className="px-4 py-3">{t('table.status')}</th>
-                      <th className="px-4 py-3">{t('table.runningState')}</th>
-                      <th className="px-4 py-3">{t('table.battery')}</th>
-                      <th className="px-4 py-3">{t('table.lastChecked')}</th>
-                      <th className="px-4 py-3 text-right">{t('table.actions')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((device) => (
-                      <DeviceRow
-                        key={device.id}
-                        device={device}
-                        onPoll={() => pollOneMutation.mutate(device.deviceId)}
-                        isPolling={pollOneMutation.isPending && pollOneMutation.variables === device.deviceId}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </section>
+            {pollAllMutation.isPending ? t('refreshing') : t('refresh')}
+          </button>
+        </div>
       </div>
-    </main>
+
+      {isLoading && (
+        <div className="flex justify-center py-16">
+          <Loader2 className="h-7 w-7 animate-spin text-[var(--app-brand)]" />
+        </div>
+      )}
+
+      {isError && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
+          {t('failedToLoad')}
+        </div>
+      )}
+
+      {!isLoading && !isError && filtered.length === 0 && (
+        <div className="rounded-xl border border-dashed border-[var(--app-border)] bg-[var(--app-panel)] py-16 text-center">
+          <Radio className="mx-auto h-8 w-8 text-[var(--app-muted)]" />
+          <p className="mt-3 text-sm text-[var(--app-muted)]">{t('empty')}</p>
+        </div>
+      )}
+
+      {filtered.length > 0 && (
+        <div className="overflow-x-auto rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)]">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-[var(--app-border)] text-xs font-semibold uppercase tracking-wider text-[var(--app-muted)]">
+                <th className="px-4 py-3">{t('table.device')}</th>
+                <th className="px-4 py-3">{t('table.status')}</th>
+                <th className="px-4 py-3">{t('table.runningState')}</th>
+                <th className="px-4 py-3">{t('table.battery')}</th>
+                <th className="px-4 py-3">{t('table.lastChecked')}</th>
+                <th className="px-4 py-3 text-right">{t('table.actions')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((device) => (
+                <DeviceRow
+                  key={device.id}
+                  device={device}
+                  onPoll={() => pollOneMutation.mutate(device.deviceId)}
+                  isPolling={pollOneMutation.isPending && pollOneMutation.variables === device.deviceId}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
   );
 }

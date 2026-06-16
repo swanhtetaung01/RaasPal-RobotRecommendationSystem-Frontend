@@ -64,6 +64,7 @@ import type {
   GenerateProposalRequest,
   GeneratedProposalResponse,
   LoginRequest,
+  MonthlyReportSummary,
   PagedResponse,
   RecommendationResponse,
   RequirementResponse,
@@ -199,4 +200,17 @@ export const cvteApi = {
 
   pollOne: (deviceId: string) =>
     api.post<ApiResponse<CvteDeviceResponse>>(`/api/v1/cvte/devices/${deviceId}/poll-now`),
+};
+
+// Monthly report automation (generate per-robot xlsx → Supabase → n8n → LINE)
+export const reportApi = {
+  /**
+   * Runs the monthly report for `month` ("YYYY-MM", defaults to previous month
+   * when omitted). With `testMode` true (default), files are generated, uploaded,
+   * and signed download URLs returned WITHOUT sending anything to n8n/LINE.
+   */
+  runMonthly: (month: string | undefined, testMode: boolean) =>
+    api.post<ApiResponse<MonthlyReportSummary>>('/api/v1/reports/monthly/run', null, {
+      params: { ...(month ? { month } : {}), testMode },
+    }),
 };

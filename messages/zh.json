@@ -9,6 +9,7 @@
     "reports": "报告",
     "robots": "机器人",
     "cvteStatus": "CVTE C3 状态",
+    "tools": "工具",
     "users": "用户",
     "login": "登录",
     "logout": "退出",
@@ -451,6 +452,46 @@
       "offline": "离线",
       "unknown": "未知"
     }
+  },
+  "tools": {
+    "eyebrow": "运营",
+    "title": "工具",
+    "searchPlaceholder": "机器人监控与报告自动化",
+    "tabs": {
+      "monitor": "监控机器人",
+      "reports": "管理报告自动化"
+    }
+  },
+  "reports": {
+    "panel": {
+      "heading": "每月报告自动化",
+      "description": "每台机器人的每月清洁报告会生成为 Excel 文件并托管，然后通过 LINE 发送给客户——每位客户一条消息，其中包含每台机器人的下载链接。"
+    },
+    "autoNote": "如果服务器上已启用自动发送，报告会在每月结束后自动发出。除非您想提前发送或重新发送，否则无需在此操作。",
+    "monthLabel": "报告月份",
+    "previewButton": "生成并预览",
+    "previewing": "正在生成…",
+    "sendButton": "立即发送到 LINE",
+    "sending": "正在发送…",
+    "confirmTitle": "确认正式发送给客户？",
+    "confirmBody": "这将生成 {month} 每台机器人的报告，并向每位已设置接收人的客户发送真实的 LINE 消息。LINE 推送消息可能产生费用。",
+    "confirmYes": "是的，立即发送",
+    "confirmCancel": "取消",
+    "resultTitle": "{month} 的结果",
+    "testModeBadge": "预览（未发送）",
+    "liveModeBadge": "已正式发送",
+    "stats": {
+      "customers": "客户",
+      "robots": "报告文件",
+      "messages": "已发送消息",
+      "skipped": "无接收人"
+    },
+    "errorCounts": "{robotErrors} 个文件错误，{sendErrors} 个发送错误——请查看服务器日志。",
+    "previewsTitle": "已生成的报告",
+    "noRecipient": "未设置 LINE 接收人",
+    "downloadLabel": "下载",
+    "emptyResult": "未找到 {month} 的机器人任务报告，无可生成内容。",
+    "errorGeneric": "报告运行失败，请重试。"
   },
   "userMenu": {
     "profile": "个人资料",
