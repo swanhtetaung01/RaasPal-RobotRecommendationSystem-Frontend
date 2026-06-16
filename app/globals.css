@@ -92,6 +92,37 @@
   --app-hero-soft: rgba(255, 255, 255, 0.08);
 }
 
+/* ─── Login page (Bold & Premium) ─────────────────────────────────────────────
+   Animated glow orbs + slow aurora drift for the gradient brand panel.
+   Scoped to opt-in utility classes so nothing else in the app is affected.
+─────────────────────────────────────────────────────────────────────────── */
+
+@keyframes float-orb {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(0, -26px, 0) scale(1.06); }
+}
+
+@keyframes float-orb-alt {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(18px, 16px, 0) scale(0.94); }
+}
+
+@keyframes aurora-pan {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-float-orb      { animation: float-orb 11s ease-in-out infinite; }
+.animate-float-orb-alt  { animation: float-orb-alt 13s ease-in-out infinite; }
+.animate-aurora         { background-size: 200% 200%; animation: aurora-pan 18s ease infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-orb,
+  .animate-float-orb-alt,
+  .animate-aurora { animation: none; }
+}
+
 @theme inline {
   /* Surfaces */
   --color-canvas:        var(--canvas);

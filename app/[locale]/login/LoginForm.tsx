@@ -87,7 +87,7 @@ export function LoginForm({ locale }: LoginFormProps) {
         </Label>
         <Input
           autoComplete="email"
-          className="border-[var(--app-border)] bg-[var(--app-panel-alt)] text-[var(--app-text)] placeholder:text-[var(--app-muted)] focus-visible:ring-[var(--app-brand)]"
+          className="h-11 rounded-xl border-[var(--app-border)] bg-[var(--app-panel-alt)]/80 text-[var(--app-text)] placeholder:text-[var(--app-muted)] transition focus-visible:border-[var(--app-brand)] focus-visible:ring-[var(--app-brand)]"
           disabled={loading}
           id="email"
           onChange={(e) => setEmail(e.target.value)}
@@ -105,7 +105,7 @@ export function LoginForm({ locale }: LoginFormProps) {
         <div className="relative">
           <Input
             autoComplete="current-password"
-            className="border-[var(--app-border)] bg-[var(--app-panel-alt)] pr-10 text-[var(--app-text)] placeholder:text-[var(--app-muted)] focus-visible:ring-[var(--app-brand)]"
+            className="h-11 rounded-xl border-[var(--app-border)] bg-[var(--app-panel-alt)]/80 pr-10 text-[var(--app-text)] placeholder:text-[var(--app-muted)] transition focus-visible:border-[var(--app-brand)] focus-visible:ring-[var(--app-brand)]"
             disabled={loading}
             id="password"
             onChange={(e) => setPassword(e.target.value)}
@@ -132,7 +132,7 @@ export function LoginForm({ locale }: LoginFormProps) {
       )}
 
       <Button
-        className="w-full bg-[var(--app-brand)] font-semibold text-white hover:bg-[var(--app-brand-dark)] focus-visible:ring-[var(--app-brand)]"
+        className="h-11 w-full rounded-xl bg-gradient-to-r from-[var(--app-brand)] to-[var(--app-brand-dark)] font-semibold text-white shadow-lg shadow-[var(--app-brand-glow)] transition hover:shadow-xl hover:shadow-[var(--app-brand-glow)] hover:brightness-105 focus-visible:ring-[var(--app-brand)] active:scale-[0.99]"
         disabled={loading}
         type="submit"
       >
