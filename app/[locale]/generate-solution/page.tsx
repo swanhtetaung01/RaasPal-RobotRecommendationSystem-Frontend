@@ -44,14 +44,16 @@ export default async function GenerateSolutionPage() {
           />
 
           <div className="space-y-6 p-4 sm:p-6">
-            <section className="rounded-xl border border-[var(--app-border)] bg-[var(--app-hero)] p-6 text-white shadow-sm">
-              <div className="flex flex-wrap items-start justify-between gap-4">
+            <section className="bg-aurora animate-aurora relative overflow-hidden rounded-3xl p-6 text-white shadow-xl shadow-[var(--app-brand-glow)] sm:p-8">
+              <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(255,255,255,0.16),transparent_55%)]" />
+              <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-cyan-300/30 blur-3xl animate-float-orb" />
+              <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-semibold uppercase text-cyan-100">{t('hub.kicker')}</p>
+                  <p className="text-sm font-semibold uppercase tracking-wider text-cyan-100">{t('hub.kicker')}</p>
                   <h2 className="mt-3 max-w-3xl text-3xl font-bold">{t('hub.title')}</h2>
-                  <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70">{t('hub.description')}</p>
+                  <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75">{t('hub.description')}</p>
                 </div>
-                <span className="flex h-14 w-14 items-center justify-center rounded-xl bg-[var(--app-brand-soft)] text-[var(--app-brand-dark)]">
+                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-cyan-100 ring-1 ring-white/20 backdrop-blur-sm">
                   <Sparkles className="h-7 w-7" />
                 </span>
               </div>

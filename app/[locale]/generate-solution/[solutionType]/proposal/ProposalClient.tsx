@@ -121,10 +121,10 @@ function ProposalInner({ solutionType }: Pick<ProposalClientProps, 'solutionType
             </Link>
 
             {/* Header */}
-            <div className="rounded-xl border border-[var(--app-border)] bg-[var(--app-hero)] p-6 text-white shadow-sm">
-              <p className="text-sm font-semibold uppercase text-cyan-100">{t('step')}</p>
+            <div className="bg-aurora animate-aurora relative overflow-hidden rounded-2xl p-6 text-white shadow-lg shadow-[var(--app-brand-glow)]">
+              <p className="text-sm font-semibold uppercase tracking-wider text-cyan-100">{t('step')}</p>
               <h2 className="mt-2 text-2xl font-bold">{t('heading')}</h2>
-              <p className="mt-2 max-w-lg text-sm leading-6 text-white/70">{t('description')}</p>
+              <p className="mt-2 max-w-lg text-sm leading-6 text-white/75">{t('description')}</p>
             </div>
 
             {/* Loading */}

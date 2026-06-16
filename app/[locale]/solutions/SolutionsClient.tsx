@@ -90,7 +90,7 @@ function EmptyState({ filtered }: { filtered: boolean }) {
   const t = useTranslations('solutions');
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--app-border)] bg-[var(--app-panel)] py-20 text-center">
-      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--app-hero)] text-[var(--app-brand)]">
+      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--app-brand)] to-[var(--app-brand-dark)] text-white shadow-sm shadow-[var(--app-brand-glow)]">
         <ClipboardList className="h-7 w-7" />
       </span>
       <h3 className="mt-4 text-lg font-semibold text-[var(--app-text)]">

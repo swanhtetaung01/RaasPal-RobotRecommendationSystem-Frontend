@@ -80,17 +80,17 @@ export function LanguageSwitcher() {
         aria-label="Select language"
         className="
           flex items-center gap-2 rounded-lg px-3 py-2
-          text-sm font-medium text-ink-muted
-          border border-transparent
-          hover:border-edge hover:bg-elevated hover:text-ink
+          text-sm font-semibold text-[var(--app-text)]
+          border border-[var(--app-border)] bg-[var(--app-panel)] shadow-sm
+          hover:border-[var(--app-brand)] hover:bg-[var(--app-brand-soft)] hover:text-[var(--app-brand-dark)]
           transition-all duration-150
-          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-brand)]
         "
       >
-        <Globe className="h-4 w-4 text-accent shrink-0" />
+        <Globe className="h-4 w-4 text-[var(--app-brand)] shrink-0" />
         <span className="hidden sm:inline">{current.nativeLabel}</span>
         <ChevronDown
-          className={`h-3 w-3 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`h-3 w-3 shrink-0 text-[var(--app-muted)] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -107,8 +107,8 @@ export function LanguageSwitcher() {
             className="
               absolute right-0 z-50 mt-2 w-44 origin-top-right
               overflow-hidden rounded-xl
-              border border-edge bg-surface
-              shadow-2xl shadow-black/50
+              border border-[var(--app-border)] bg-[var(--app-panel)]
+              shadow-2xl shadow-slate-900/15
             "
           >
             {LANGUAGES.map((lang) => {
@@ -121,8 +121,8 @@ export function LanguageSwitcher() {
                       w-full flex items-center justify-between gap-3
                       px-4 py-2.5 text-sm transition-colors duration-100
                       ${isActive
-                        ? 'bg-accent-faint text-accent font-medium'
-                        : 'text-ink-muted hover:bg-elevated hover:text-ink'}
+                        ? 'bg-[var(--app-brand-soft)] text-[var(--app-brand-dark)] font-semibold'
+                        : 'text-[var(--app-muted)] hover:bg-[var(--app-faint)] hover:text-[var(--app-text)]'}
                     `}
                   >
                     <span className="flex items-center gap-2.5">
@@ -131,7 +131,7 @@ export function LanguageSwitcher() {
                         className={`
                           inline-flex h-5 w-7 items-center justify-center
                           rounded text-[10px] font-bold uppercase tracking-wider
-                          ${isActive ? 'bg-accent text-canvas' : 'bg-elevated text-ink-dim'}
+                          ${isActive ? 'bg-[var(--app-brand)] text-white' : 'bg-[var(--app-faint)] text-[var(--app-muted)]'}
                         `}
                       >
                         {lang.locale}
@@ -145,8 +145,8 @@ export function LanguageSwitcher() {
             })}
 
             {/* Bottom label */}
-            <li aria-hidden className="border-t border-edge px-4 py-2">
-              <span className="text-[11px] text-ink-dim">
+            <li aria-hidden className="border-t border-[var(--app-border)] px-4 py-2">
+              <span className="text-[11px] text-[var(--app-muted)]">
                 {routing.locales.length} languages available
               </span>
             </li>
