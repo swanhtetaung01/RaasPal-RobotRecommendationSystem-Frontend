@@ -64,8 +64,8 @@ import type {
   GenerateProposalRequest,
   GeneratedProposalResponse,
   LoginRequest,
+  MonthlyReportSummary,
   PagedResponse,
-  RecommendationItemResponse,
   RecommendationResponse,
   RequirementResponse,
   RobotImportResult,
@@ -73,6 +73,7 @@ import type {
   RobotResponse,
   RobotType,
   TestStatus,
+  TranslationResponse,
   UserResponse,
 } from '@/types/api';
 
@@ -180,6 +181,12 @@ export const proposalApi = {
     api.delete<ApiResponse<void>>(`/api/v1/proposals/${id}`),
 };
 
+// Translation
+export const translateApi = {
+  toThai: (texts: string[]) =>
+    api.post<ApiResponse<TranslationResponse>>('/api/v1/translate/thai', { texts }),
+};
+
 // CVTE C3 status (kept separate from robotApi — see [[CvteDevice]] on the backend)
 export const cvteApi = {
   getAll: (page = 0, size = 100) =>
@@ -193,4 +200,17 @@ export const cvteApi = {
 
   pollOne: (deviceId: string) =>
     api.post<ApiResponse<CvteDeviceResponse>>(`/api/v1/cvte/devices/${deviceId}/poll-now`),
+};
+
+// Monthly report automation (generate per-robot xlsx → Supabase → n8n → LINE)
+export const reportApi = {
+  /**
+   * Runs the monthly report for `month` ("YYYY-MM", defaults to previous month
+   * when omitted). With `testMode` true (default), files are generated, uploaded,
+   * and signed download URLs returned WITHOUT sending anything to n8n/LINE.
+   */
+  runMonthly: (month: string | undefined, testMode: boolean) =>
+    api.post<ApiResponse<MonthlyReportSummary>>('/api/v1/reports/monthly/run', null, {
+      params: { ...(month ? { month } : {}), testMode },
+    }),
 };

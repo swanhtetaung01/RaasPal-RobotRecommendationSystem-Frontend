@@ -12,7 +12,7 @@ const REFRESH_MS = 60_000;
 
 /**
  * Compact "less detail" preview of CVTE C3 online/offline status for the
- * Team Dashboard — links through to the full /cvte page for the table view.
+ * Team Dashboard — links through to the Tools page (monitor tab) for the table view.
  */
 export function CvteStatusSummary() {
   const t = useTranslations('teamDashboard.cvteSummary');
@@ -39,7 +39,7 @@ export function CvteStatusSummary() {
         </div>
         <Link
           className="flex items-center gap-1 text-xs font-semibold text-[var(--app-muted)] transition hover:text-[var(--app-brand-dark)]"
-          href="/cvte"
+          href="/tools"
         >
           {t('viewAll')}
           <ChevronRight className="h-3.5 w-3.5" />
