@@ -51,6 +51,19 @@ export interface CreateUserRequest {
   role: 'ADMIN' | 'SPECIALIST';
 }
 
+/**
+ * Public self-service sign-up payload.
+ * NOTE: the backend does not expose `POST /api/v1/auth/register` yet — this
+ * shape is defined ahead of time so the /register page can be wired with a
+ * single flag flip once that endpoint exists. No `role` here: a public sign-up
+ * would default server-side (e.g. SPECIALIST) rather than letting users self-assign.
+ */
+export interface RegisterRequest {
+  fullName: string;
+  email: string;
+  password: string;
+}
+
 /* ─── File upload ─────────────────────────────────────────────────────────── */
 
 export interface FileUploadResponse {

@@ -38,22 +38,30 @@ export default async function LocaleHomePage() {
             {/* CVTE C3 status preview */}
             <CvteStatusSummary />
 
-            {/* Hero CTA */}
-            <div className="relative overflow-hidden rounded-2xl bg-[var(--app-hero)] p-8 text-white shadow-lg">
+            {/* Hero CTA — Bold & Premium showcase surface */}
+            <div className="relative overflow-hidden rounded-3xl p-8 text-white shadow-xl shadow-[var(--app-brand-glow)] sm:p-10">
+              {/* animated aurora gradient + light sweep */}
+              <div className="animate-aurora absolute inset-0 bg-gradient-to-br from-[#0a4d6b] via-[var(--app-brand-dark)] to-[#1b4ed8]" />
+              <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(255,255,255,0.18),transparent_55%)]" />
+
+              {/* glow orbs */}
+              <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-cyan-300/30 blur-3xl animate-float-orb" />
+              <div className="pointer-events-none absolute -bottom-20 right-32 h-48 w-48 rounded-full bg-indigo-400/25 blur-3xl animate-float-orb-alt" />
+
               <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-cyan-300" />
-                    <span className="text-sm font-semibold uppercase tracking-wider text-cyan-200">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 ring-1 ring-white/20 backdrop-blur-sm">
+                    <Sparkles className="h-3.5 w-3.5 text-cyan-200" />
+                    <span className="text-xs font-semibold uppercase tracking-wider text-cyan-100">
                       {t('hero.eyebrow')}
                     </span>
                   </div>
-                  <h2 className="text-2xl font-bold leading-tight">{t('hero.title')}</h2>
-                  <p className="max-w-md text-sm leading-6 text-white/70">{t('hero.description')}</p>
+                  <h2 className="text-2xl font-bold leading-tight xl:text-3xl">{t('hero.title')}</h2>
+                  <p className="max-w-md text-sm leading-6 text-white/75">{t('hero.description')}</p>
                 </div>
 
                 <Link
-                  className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-[var(--app-hero)] shadow transition hover:bg-cyan-50 active:scale-95"
+                  className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-[var(--app-brand-dark)] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:scale-95"
                   href="/generate-solution"
                 >
                   <Zap className="h-4 w-4" />
@@ -61,10 +69,6 @@ export default async function LocaleHomePage() {
                   <ChevronRight className="h-4 w-4" />
                 </Link>
               </div>
-
-              {/* decorative blobs */}
-              <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/5" />
-              <div className="pointer-events-none absolute -bottom-8 right-24 h-32 w-32 rounded-full bg-white/5" />
             </div>
 
             {/* How it works */}
@@ -76,9 +80,9 @@ export default async function LocaleHomePage() {
                 {steps.map((step) => (
                   <div
                     key={step.number}
-                    className="rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] p-4"
+                    className="group rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5 transition hover:-translate-y-0.5 hover:border-[var(--app-brand)] hover:shadow-md hover:shadow-[var(--app-brand-glow)]"
                   >
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--app-brand-soft)] text-sm font-bold text-[var(--app-brand-dark)]">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--app-brand)] to-[var(--app-brand-dark)] text-sm font-bold text-white shadow-sm shadow-[var(--app-brand-glow)]">
                       {step.number}
                     </span>
                     <p className="mt-3 text-sm font-semibold text-[var(--app-text)]">{step.title}</p>
@@ -97,17 +101,17 @@ export default async function LocaleHomePage() {
                 {quickLinks.map(({ href, icon: Icon, label, description }) => (
                   <Link
                     key={href}
-                    className="flex items-center gap-4 rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] p-4 transition hover:-translate-y-0.5 hover:border-[var(--app-brand)] hover:shadow-md hover:shadow-[var(--app-brand-glow)]"
+                    className="group flex items-center gap-4 rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-4 transition hover:-translate-y-0.5 hover:border-[var(--app-brand)] hover:shadow-md hover:shadow-[var(--app-brand-glow)]"
                     href={href}
                   >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--app-brand-soft)] text-[var(--app-brand-dark)]">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--app-brand-soft)] text-[var(--app-brand-dark)] transition group-hover:bg-gradient-to-br group-hover:from-[var(--app-brand)] group-hover:to-[var(--app-brand-dark)] group-hover:text-white">
                       <Icon className="h-5 w-5" />
                     </span>
                     <div>
                       <p className="text-sm font-semibold text-[var(--app-text)]">{label}</p>
                       <p className="text-xs text-[var(--app-muted)]">{description}</p>
                     </div>
-                    <ChevronRight className="ml-auto h-4 w-4 shrink-0 text-[var(--app-muted)]" />
+                    <ChevronRight className="ml-auto h-4 w-4 shrink-0 text-[var(--app-muted)] transition group-hover:translate-x-0.5 group-hover:text-[var(--app-brand)]" />
                   </Link>
                 ))}
               </div>

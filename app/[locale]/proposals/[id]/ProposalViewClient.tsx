@@ -92,13 +92,20 @@ export function ProposalViewClient({ id }: ProposalViewClientProps) {
               Back to proposals
             </Link>
 
-            {/* Header banner */}
-            <div className="rounded-xl border border-[var(--app-border)] bg-[var(--app-hero)] p-6 text-white shadow-sm">
-              <p className="text-sm font-semibold uppercase text-cyan-100">Proposal</p>
-              <h2 className="mt-2 text-2xl font-bold">Customer Proposal</h2>
-              <p className="mt-2 max-w-lg text-sm leading-6 text-white/70">
-                AI-generated proposal. Review and verify with the RAASPAL team before presenting to the customer.
-              </p>
+            {/* Header banner — Bold & Premium (customer-facing) */}
+            <div className="bg-aurora animate-aurora relative overflow-hidden rounded-3xl p-6 text-white shadow-xl shadow-[var(--app-brand-glow)] sm:p-8">
+              <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(255,255,255,0.16),transparent_55%)]" />
+              <div className="pointer-events-none absolute -right-14 -top-14 h-56 w-56 rounded-full bg-cyan-300/30 blur-3xl animate-float-orb" />
+              <div className="relative z-10">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-100 ring-1 ring-white/20 backdrop-blur-sm">
+                  <FileText className="h-3.5 w-3.5" />
+                  Proposal
+                </span>
+                <h2 className="mt-3 text-2xl font-bold sm:text-3xl">Customer Proposal</h2>
+                <p className="mt-2 max-w-lg text-sm leading-6 text-white/75">
+                  AI-generated proposal. Review and verify with the RAASPAL team before presenting to the customer.
+                </p>
+              </div>
             </div>
 
             {/* Loading */}
@@ -194,8 +201,9 @@ export function ProposalViewClient({ id }: ProposalViewClientProps) {
                   </Button>
                 </div>
 
-                {/* Proposal body */}
-                <div className="rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] p-6">
+                {/* Proposal body — document surface */}
+                <div className="relative overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-6 shadow-sm sm:p-8">
+                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--app-brand)] to-[var(--app-brand-dark)]" />
                   {proposal.proposalContent ? (
                     <pre className="whitespace-pre-wrap font-sans text-sm leading-7 text-[var(--app-text)]">
                       {proposal.proposalContent}

@@ -64,13 +64,15 @@ export function TopNavigationMenu() {
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="flex items-center gap-3 border-b border-[var(--app-border)] bg-[var(--app-panel-alt)] p-4">
-              <Image
-                alt="RAAS PAL logo"
-                className="h-11 w-11 rounded-xl object-contain shadow-md shadow-[var(--app-brand-glow)]"
-                height={44}
-                src="/raas-pal-logo.png"
-                width={44}
-              />
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--app-brand)] to-[var(--app-brand-dark)] shadow-md shadow-[var(--app-brand-glow)]">
+                <Image
+                  alt="RAAS PAL logo"
+                  className="h-7 w-7 object-contain"
+                  height={28}
+                  src="/raas-pal-logo.png"
+                  width={28}
+                />
+              </div>
               <div>
                 <p className="text-sm font-semibold text-[var(--app-text)]">RAAS PAL</p>
                 <p className="text-xs text-[var(--app-muted)]">{sidebarT('teamWorkspace')}</p>
@@ -84,16 +86,19 @@ export function TopNavigationMenu() {
                 return (
                 <Link
                   key={item.labelKey}
-                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-semibold transition ${
+                  className={`relative flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition ${
                     active
-                      ? 'border border-[var(--app-brand)] bg-[var(--app-brand-soft)] text-[var(--app-brand-dark)]'
+                      ? 'bg-gradient-to-r from-[var(--app-brand-soft)] to-transparent text-[var(--app-brand-dark)]'
                       : 'text-[var(--app-muted)] hover:bg-[var(--app-faint)] hover:text-[var(--app-brand-dark)]'
                   }`}
                   href={item.href}
                   onClick={() => setOpen(false)}
                   role="menuitem"
                 >
-                  <item.icon className="h-4 w-4 shrink-0" />
+                  {active && (
+                    <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-[var(--app-brand)] to-[var(--app-brand-dark)]" />
+                  )}
+                  <item.icon className={`h-4 w-4 shrink-0 ${active ? 'text-[var(--app-brand)]' : ''}`} />
                   {t(item.labelKey)}
                 </Link>
               )})}
@@ -102,7 +107,7 @@ export function TopNavigationMenu() {
             <div className="border-t border-[var(--app-border)] p-4">
               <p className="text-xs font-semibold uppercase text-[var(--app-muted)]">{sidebarT('signedInAs')}</p>
               <div className="mt-3 flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--app-hero)] text-sm font-bold text-white">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[var(--app-brand)] to-[var(--app-brand-dark)] text-sm font-bold text-white shadow-sm shadow-[var(--app-brand-glow)]">
                   RE
                 </span>
                 <div>

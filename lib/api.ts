@@ -66,6 +66,7 @@ import type {
   LoginRequest,
   MonthlyReportSummary,
   PagedResponse,
+  RegisterRequest,
   RecommendationResponse,
   RequirementResponse,
   RobotImportResult,
@@ -124,6 +125,15 @@ export const authApi = {
 
   verifyPassword: (password: string) =>
     api.post<ApiResponse<void>>('/api/v1/auth/verify-password', { password }),
+
+  /**
+   * Public self-service registration.
+   * ⚠ The backend endpoint does not exist yet — calling this today will 404.
+   * The /register page keeps it behind a feature flag (REGISTRATION_ENABLED)
+   * until `POST /api/v1/auth/register` ships and is whitelisted in SecurityConfig.
+   */
+  register: (body: RegisterRequest) =>
+    api.post<ApiResponse<AuthResponse>>('/api/v1/auth/register', body),
 };
 
 // File upload

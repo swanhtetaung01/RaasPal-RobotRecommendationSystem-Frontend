@@ -32,7 +32,7 @@ import { routing } from './i18n/routing';
 const handleI18nRouting = createMiddleware(routing);
 
 /** Paths that do NOT require a JWT. Matched against the path after locale strip. */
-const PUBLIC_PATHS = ['/login'];
+const PUBLIC_PATHS = ['/login', '/register'];
 
 /** Returns true if the path (locale stripped) is a public route. */
 function isPublic(pathname: string): boolean {

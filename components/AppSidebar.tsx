@@ -39,14 +39,16 @@ export function AppSidebar() {
       }`}
     >
       <div className={`mb-8 flex items-center gap-3 px-2 ${collapsed ? 'justify-center' : ''}`}>
-        <Image
-          alt="RAAS PAL logo"
-          className={`${collapsed ? 'h-12 w-12' : 'h-14 w-14'} rounded-2xl object-contain transition-[height,width] dark:shadow-lg dark:shadow-[var(--app-brand-glow)]`}
-          height={56}
-          priority
-          src="/raas-pal-logo.png"
-          width={56}
-        />
+        <div className={`flex ${collapsed ? 'h-12 w-12' : 'h-14 w-14'} shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--app-brand)] to-[var(--app-brand-dark)] shadow-md shadow-[var(--app-brand-glow)] transition-[height,width]`}>
+          <Image
+            alt="RAAS PAL logo"
+            className={`${collapsed ? 'h-8 w-8' : 'h-9 w-9'} object-contain transition-[height,width]`}
+            height={36}
+            priority
+            src="/raas-pal-logo.png"
+            width={36}
+          />
+        </div>
         {!collapsed && (
           <div>
             <p className="text-base font-semibold">RAAS PAL</p>
@@ -78,16 +80,19 @@ export function AppSidebar() {
             key={item.labelKey}
             aria-label={t(item.labelKey)}
             title={collapsed ? t(item.labelKey) : undefined}
-            className={`flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-semibold transition ${
+            className={`group relative flex h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-semibold transition ${
               collapsed ? 'justify-center' : ''
             } ${
               active
-                ? 'border border-[var(--app-brand)] bg-[var(--app-panel)] text-[var(--app-brand-dark)] shadow-sm'
+                ? 'bg-gradient-to-r from-[var(--app-brand-soft)] to-transparent text-[var(--app-brand-dark)] shadow-sm'
                 : 'text-[var(--app-muted)] hover:bg-[var(--app-panel)] hover:text-[var(--app-brand-dark)]'
             }`}
             href={item.href}
           >
-            <item.icon className="h-4 w-4 shrink-0" />
+            {active && (
+              <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-[var(--app-brand)] to-[var(--app-brand-dark)]" />
+            )}
+            <item.icon className={`h-4 w-4 shrink-0 transition ${active ? 'text-[var(--app-brand)]' : 'group-hover:text-[var(--app-brand)]'}`} />
             {!collapsed && <span>{t(item.labelKey)}</span>}
           </Link>
         )})}
@@ -96,7 +101,7 @@ export function AppSidebar() {
       <div className={`mt-auto rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)]/80 p-4 ${collapsed ? 'px-2' : ''}`}>
         {!collapsed && <p className="text-xs font-semibold uppercase text-[var(--app-muted)]">{sidebarT('signedInAs')}</p>}
         <div className={`flex items-center gap-3 ${collapsed ? 'justify-center' : 'mt-3'}`}>
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--app-hero)] text-sm font-bold text-white">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[var(--app-brand)] to-[var(--app-brand-dark)] text-sm font-bold text-white shadow-sm shadow-[var(--app-brand-glow)]">
             {user?.fullName?.slice(0, 2).toUpperCase() ?? 'RE'}
           </span>
           {!collapsed && (

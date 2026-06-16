@@ -60,10 +60,11 @@ export function AppTopBar({
 
         <button
           aria-label="Notifications"
-          className="hidden h-10 w-10 items-center justify-center rounded-lg border border-[var(--app-border)] text-[var(--app-muted)] sm:flex"
+          className="relative hidden h-10 w-10 items-center justify-center rounded-xl border border-[var(--app-border)] text-[var(--app-muted)] transition hover:border-[var(--app-brand)] hover:text-[var(--app-brand-dark)] sm:flex"
           type="button"
         >
           <Bell className="h-4 w-4" />
+          <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[var(--app-brand)]" />
         </button>
         <ThemeToggle />
         <LanguageSwitcher />
