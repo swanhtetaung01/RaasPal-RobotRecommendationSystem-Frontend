@@ -17,12 +17,27 @@ import { reportApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import type { ApiResponse, MonthlyReportSummary } from '@/types/api';
 
+type Cadence = 'monthly' | 'weekly';
+
 /** Returns the previous calendar month as "YYYY-MM" (the usual report period). */
 function previousMonth(): string {
   const d = new Date();
   d.setDate(1);
   d.setMonth(d.getMonth() - 1);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function toDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** Monday of the previous full week as "YYYY-MM-DD" (the backend snaps any day to its ISO Monday). */
+function previousWeekStart(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 7);
+  const mondayOffset = (d.getDay() + 6) % 7; // 0 = Monday
+  d.setDate(d.getDate() - mondayOffset);
+  return toDateStr(d);
 }
 
 function errorMessage(e: unknown, fallback: string): string {
@@ -138,17 +153,31 @@ function ResultView({ response }: { response: ApiResponse<MonthlyReportSummary> 
  */
 export function ReportAutomationPanel() {
   const t = useTranslations('reports');
+  const [cadence, setCadence] = useState<Cadence>('monthly');
   const [month, setMonth] = useState(previousMonth);
+  const [weekStart, setWeekStart] = useState(previousWeekStart);
   const [confirmLive, setConfirmLive] = useState(false);
   const [result, setResult] = useState<ApiResponse<MonthlyReportSummary> | null>(null);
 
   const maxMonth = useMemo(previousMonth, []);
+  const today = useMemo(() => toDateStr(new Date()), []);
+
+  /** Human-readable period for confirm/result copy. */
+  const periodLabel = cadence === 'weekly' ? (weekStart || previousWeekStart()) : (month || maxMonth);
 
   const runMutation = useMutation({
     mutationFn: ({ testMode }: { testMode: boolean }) =>
-      reportApi.runMonthly(month || undefined, testMode).then((r) => r.data),
+      (cadence === 'weekly'
+        ? reportApi.runWeekly(weekStart || undefined, testMode)
+        : reportApi.runMonthly(month || undefined, testMode)
+      ).then((r) => r.data),
     onSuccess: (res) => setResult(res),
   });
+
+  function selectCadence(next: Cadence) {
+    setCadence(next);
+    setConfirmLive(false);
+  }
 
   const previewPending = runMutation.isPending && runMutation.variables?.testMode === true;
   const livePending = runMutation.isPending && runMutation.variables?.testMode === false;
@@ -177,23 +206,64 @@ export function ReportAutomationPanel() {
 
       {/* Controls */}
       <div className="rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] p-4">
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="space-y-1.5">
-            <label htmlFor="report-month" className="text-xs font-semibold text-[var(--app-muted)]">
-              {t('monthLabel')}
-            </label>
-            <input
-              id="report-month"
-              type="month"
-              value={month}
-              max={maxMonth}
-              onChange={(e) => {
-                setMonth(e.target.value);
-                setConfirmLive(false);
-              }}
-              className="block h-10 rounded-lg border border-[var(--app-border)] bg-[var(--app-panel-alt)] px-3 text-sm text-[var(--app-text)] outline-none focus:border-[var(--app-brand)]"
-            />
+        {/* Cadence toggle */}
+        <div className="mb-4 space-y-1.5">
+          <p className="text-xs font-semibold text-[var(--app-muted)]">{t('cadenceLabel')}</p>
+          <div className="inline-flex rounded-lg border border-[var(--app-border)] bg-[var(--app-panel-alt)] p-1">
+            {(['monthly', 'weekly'] as const).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => selectCadence(c)}
+                disabled={runMutation.isPending}
+                className={`rounded-md px-4 py-1.5 text-sm font-semibold transition disabled:opacity-50 ${
+                  cadence === c
+                    ? 'bg-[var(--app-brand)] text-white shadow-sm'
+                    : 'text-[var(--app-muted)] hover:text-[var(--app-text)]'
+                }`}
+              >
+                {t(c === 'monthly' ? 'cadenceMonthly' : 'cadenceWeekly')}
+              </button>
+            ))}
           </div>
+        </div>
+
+        <div className="flex flex-wrap items-end gap-4">
+          {cadence === 'monthly' ? (
+            <div className="space-y-1.5">
+              <label htmlFor="report-month" className="text-xs font-semibold text-[var(--app-muted)]">
+                {t('monthLabel')}
+              </label>
+              <input
+                id="report-month"
+                type="month"
+                value={month}
+                max={maxMonth}
+                onChange={(e) => {
+                  setMonth(e.target.value);
+                  setConfirmLive(false);
+                }}
+                className="block h-10 rounded-lg border border-[var(--app-border)] bg-[var(--app-panel-alt)] px-3 text-sm text-[var(--app-text)] outline-none focus:border-[var(--app-brand)]"
+              />
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <label htmlFor="report-week" className="text-xs font-semibold text-[var(--app-muted)]">
+                {t('weekStartLabel')}
+              </label>
+              <input
+                id="report-week"
+                type="date"
+                value={weekStart}
+                max={today}
+                onChange={(e) => {
+                  setWeekStart(e.target.value);
+                  setConfirmLive(false);
+                }}
+                className="block h-10 rounded-lg border border-[var(--app-border)] bg-[var(--app-panel-alt)] px-3 text-sm text-[var(--app-text)] outline-none focus:border-[var(--app-brand)]"
+              />
+            </div>
+          )}
 
           <div className="flex flex-wrap items-center gap-3">
             <Button
@@ -225,7 +295,7 @@ export function ReportAutomationPanel() {
               <div className="flex-1">
                 <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">{t('confirmTitle')}</p>
                 <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
-                  {t('confirmBody', { month: month || maxMonth })}
+                  {t('confirmBody', { month: periodLabel })}
                 </p>
                 <div className="mt-3 flex items-center gap-2">
                   <Button
