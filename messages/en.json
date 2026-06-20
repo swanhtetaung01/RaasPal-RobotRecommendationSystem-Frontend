@@ -468,6 +468,10 @@
       "description": "Each robot's monthly cleaning report is generated as an Excel file, hosted, and delivered to the customer over LINE — one message per customer with a download link for each robot."
     },
     "autoNote": "If automatic sending is enabled on the server, reports go out on their own after each month ends. You don't need to do anything here unless you want to send early or re-send.",
+    "cadenceLabel": "Report period",
+    "cadenceMonthly": "Monthly",
+    "cadenceWeekly": "Weekly",
+    "weekStartLabel": "Week starting",
     "monthLabel": "Report month",
     "previewButton": "Generate & preview",
     "previewing": "Generating…",

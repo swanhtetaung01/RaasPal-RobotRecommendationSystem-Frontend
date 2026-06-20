@@ -223,4 +223,14 @@ export const reportApi = {
     api.post<ApiResponse<MonthlyReportSummary>>('/api/v1/reports/monthly/run', null, {
       params: { ...(month ? { month } : {}), testMode },
     }),
+
+  /**
+   * Runs the weekly report for the ISO week containing `weekStart` ("YYYY-MM-DD",
+   * defaults to the previous full week when omitted). Same testMode semantics as
+   * runMonthly. The summary's `reportMonth` field carries the week label (e.g. "2026-W25").
+   */
+  runWeekly: (weekStart: string | undefined, testMode: boolean) =>
+    api.post<ApiResponse<MonthlyReportSummary>>('/api/v1/reports/weekly/run', null, {
+      params: { ...(weekStart ? { weekStart } : {}), testMode },
+    }),
 };

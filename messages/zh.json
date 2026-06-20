@@ -468,6 +468,10 @@
       "description": "每台机器人的每月清洁报告会生成为 Excel 文件并托管，然后通过 LINE 发送给客户——每位客户一条消息，其中包含每台机器人的下载链接。"
     },
     "autoNote": "如果服务器上已启用自动发送，报告会在每月结束后自动发出。除非您想提前发送或重新发送，否则无需在此操作。",
+    "cadenceLabel": "报告周期",
+    "cadenceMonthly": "每月",
+    "cadenceWeekly": "每周",
+    "weekStartLabel": "起始周",
     "monthLabel": "报告月份",
     "previewButton": "生成并预览",
     "previewing": "正在生成…",
