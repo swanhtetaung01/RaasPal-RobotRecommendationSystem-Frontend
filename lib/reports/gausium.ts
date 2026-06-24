@@ -1,15 +1,13 @@
 /**
  * reports/gausium.ts — the Gausium-brand Monthly Performance Report entity.
  *
- * Gausium robots are floor scrubbers, so the Part #4 health components are
- * scrubber consumables (Battery / Brush / Filter / Squeegee / System). Other
- * brands will define their own entity file with their own health components and
- * metrics, all extending `MonthlyPerformanceReport`.
+ * Gausium robots are floor scrubbers, so Part 3 consumables are Brush / Filter /
+ * Squeegee. Other brands define their own entity with their own metrics.
  *
- * `sampleGausiumReport` exists only to preview the page before the backend's
- * public report endpoint is built. It invents no real specs or prices.
+ * `sampleGausiumReport` mirrors the manager's mockup values so the page can be
+ * previewed before live telemetry is wired. It invents no real specs or prices.
  */
-import type { MonthlyPerformanceReport } from './types';
+import { DEFAULT_CUSTOMER_QUESTIONS, type MonthlyPerformanceReport } from './types';
 
 /** Gausium-specific monthly report. Brand is pinned to 'GAUSIUM'. */
 export interface GausiumMonthlyReport extends MonthlyPerformanceReport {
@@ -19,46 +17,42 @@ export interface GausiumMonthlyReport extends MonthlyPerformanceReport {
 /** Preview data for /[locale]/report/[token] until real data is wired in. */
 export const sampleGausiumReport: GausiumMonthlyReport = {
   brand: 'GAUSIUM',
-  customerName: 'Central Pattana Co., Ltd.',
-  siteBranch: 'CentralWorld — Ground Floor Atrium',
-  robotName: 'Gausium Scrubber 50 (SN GS50-2210-0457)',
-  periodLabel: 'June 1 – June 30, 2026',
-  overallHealth: 'monitor',
+  customerName: 'Benz Rama3',
+  siteBranch: 'Rama3 Road',
+  robotName: 'Gausium Scrubber 50',
+  serialNumber: 'GS50-2210-0457',
+  periodLabel: 'June 2026',
+  customerQuestions: DEFAULT_CUSTOMER_QUESTIONS,
 
-  executiveSummary: [
-    { icon: 'clock', label: 'Total Operating Hours', value: '182 hrs', hint: 'Across 30 days' },
-    { icon: 'tasks', label: 'Total Tasks Completed', value: '1,248', hint: '94% completion rate' },
-    { icon: 'area', label: 'Total Area Covered', value: '412,500 m²', hint: 'Cleaned this month' },
-    { icon: 'productivity', label: 'Average Productivity', value: '2,267 m²/hr', hint: 'Per operating hour' },
-    { icon: 'health', label: 'Overall Robot Health', value: 'Monitor', hint: '1 part needs action' },
-  ],
+  executive: {
+    totalTasksCompleted: 3,
+    totalOperatingTime: '0 h 12 min 7 sec',
+    totalAreaCleanedSqm: 12.67,
+    averageProductivitySqmH: 62.74,
+    waterConsumptionL: 2.29,
+    // sum(start−end) ÷ total area × 100. Representative value for the preview.
+    batteryConsumption: '5.5 %/100 sqm',
+  },
 
-  valueDelivered: [
-    { icon: 'area', label: 'Total Area Cleaned', value: '412,500 m²' },
-    { icon: 'saved', label: 'Estimated Labor Hours Saved', value: '320 hrs', hint: 'vs. manual cleaning' },
-    { icon: 'improvement', label: 'Estimated Productivity Improvement', value: '+18%', hint: 'Month over month' },
-    { icon: 'cost', label: 'Estimated Cost Efficiency', value: '฿96,000', hint: 'Estimated labour savings' },
-  ],
+  operational: {
+    rings: [
+      { label: 'Task Completion Rate', percent: 86.6 },
+      { label: 'Cleaning Coverage Rate', percent: 86.58 },
+    ],
+    taskType: 'Floor Washing',
+    taskStatus: 'Completed',
+    tasksPerDay: '1.0',
+    averageRunTime: '4 min 02 sec',
+  },
 
-  performance: [
-    { label: 'Utilization Rate', percent: 76 },
-    { label: 'Task Completion Rate', percent: 94 },
-    { label: 'Average Cleaning Efficiency', percent: 88 },
-    { label: 'Battery Performance', percent: 82 },
-  ],
-
-  health: [
-    { label: 'Battery Status', state: 'good' },
-    { label: 'Brush Status', state: 'action', note: 'Wear at 88% — replace soon' },
-    { label: 'Filter Status', state: 'good' },
-    { label: 'Squeegee Status', state: 'monitor', note: 'Minor streaking detected' },
-    { label: 'System Status', state: 'good' },
+  consumables: [
+    { label: 'Brush', percent: 99.92, state: 'good' },
+    { label: 'Filter', percent: 100, state: 'good' },
+    { label: 'Squeegee', percent: 100, state: 'good' },
   ],
 
   recommendations: [
-    { text: 'Schedule brush replacement within 30 days', priority: 'high' },
-    { text: 'Increase cleaning schedule during peak traffic periods', priority: 'medium' },
-    { text: 'Improve docking station accessibility', priority: 'medium' },
-    { text: 'Continue current operation plan', priority: 'info' },
+    'Continue the current operation plan — performance is within a healthy range.',
+    'Monitor brush wear next month and replace when it nears 80%.',
   ],
 };
