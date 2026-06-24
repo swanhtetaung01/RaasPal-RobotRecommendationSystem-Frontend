@@ -82,6 +82,7 @@ import type {
   TranslationResponse,
   UserResponse,
 } from '@/types/api';
+import type { MonthlyPerformanceReport } from '@/lib/reports/types';
 
 // Users
 export const userApi = {
@@ -271,5 +272,11 @@ export const reportApi = {
   runWeekly: (weekStart: string | undefined, testMode: boolean) =>
     api.post<ApiResponse<MonthlyReportSummary>>('/api/v1/reports/weekly/run', null, {
       params: { ...(weekStart ? { weekStart } : {}), testMode },
+    }),
+
+  /** Aggregated monthly report for one robot, computed from its synced task reports. */
+  preview: (serialNumber: string, month: string) =>
+    api.get<ApiResponse<MonthlyPerformanceReport>>('/api/v1/reports/preview', {
+      params: { serialNumber, month },
     }),
 };

@@ -21,10 +21,10 @@ import {
   Search,
   Sparkles,
 } from 'lucide-react';
-import { robotUnitApi } from '@/lib/api';
+import { reportApi, robotUnitApi } from '@/lib/api';
 import { MonthlyReportView } from '@/components/report/MonthlyReportView';
 import { sampleGausiumReport } from '@/lib/reports/gausium';
-import { buildPreviewReport, monthYearLabel } from '@/lib/reports/preview';
+import { monthYearLabel } from '@/lib/reports/preview';
 import type { MonthlyPerformanceReport } from '@/lib/reports/types';
 import type { RobotUnitResponse } from '@/types/api';
 
@@ -67,22 +67,27 @@ export function ReportPreviewPanel() {
 
   const filtered = useMemo(() => robots.filter((r) => matchesQuery(r, query)), [robots, query]);
 
-  const report: MonthlyPerformanceReport | null = useMemo(() => {
-    if (!selection) return null;
-    const periodLabel = monthYearLabel(month);
-    if (selection.kind === 'sample') return { ...sampleGausiumReport, periodLabel };
-    const r = selection.robot;
-    return buildPreviewReport({
-      customerName: r.deployment?.customerName ?? 'Unassigned customer',
-      siteBranch: r.deployment?.site ?? '—',
-      robotName: robotDisplayName(r),
-      serialNumber: r.serialNumber,
-      periodLabel,
-    });
-  }, [selection, month]);
+  const isRobot = selection?.kind === 'robot';
+  const robotSn = selection?.kind === 'robot' ? selection.robot.serialNumber : undefined;
+
+  // Real robot → aggregate live telemetry from the API; sample → static layout data.
+  const {
+    data: robotReport,
+    isLoading: reportLoading,
+    isError: reportError,
+  } = useQuery({
+    queryKey: ['report-preview', robotSn, month],
+    queryFn: () => reportApi.preview(robotSn!, month).then((r) => r.data.data),
+    enabled: !!robotSn,
+  });
+
+  const report: MonthlyPerformanceReport | null | undefined =
+    selection?.kind === 'sample'
+      ? { ...sampleGausiumReport, periodLabel: monthYearLabel(month) }
+      : robotReport;
 
   /* ── Selected: show the report with a control bar ──────────────────────── */
-  if (report) {
+  if (selection) {
     return (
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] p-3">
@@ -107,18 +112,30 @@ export function ReportPreviewPanel() {
           </label>
         </div>
 
-        <div className="flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
-          <FlaskConical className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>
-            Layout preview only. The header (customer, site, robot) is real; the metrics are
-            representative sample values until live telemetry is connected.
-          </span>
-        </div>
+        {selection.kind === 'sample' && (
+          <div className="flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
+            <FlaskConical className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>Sample data — representative values for confirming the layout.</span>
+          </div>
+        )}
 
-        {/* Framed like a browser so the manager sees it as the customer's page */}
-        <div className="overflow-hidden rounded-2xl border border-[var(--app-border)] shadow-sm">
-          <MonthlyReportView report={report} />
-        </div>
+        {isRobot && reportLoading && (
+          <div className="flex items-center gap-2 py-10 text-sm text-[var(--app-muted)]">
+            <Loader2 className="h-4 w-4 animate-spin" /> Aggregating this robot&apos;s telemetry…
+          </div>
+        )}
+
+        {isRobot && reportError && (
+          <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
+            Could not load this robot&apos;s report. Check that you are signed in and the backend is running.
+          </p>
+        )}
+
+        {report && !(isRobot && (reportLoading || reportError)) && (
+          <div className="overflow-hidden rounded-2xl border border-[var(--app-border)] shadow-sm">
+            <MonthlyReportView report={report} />
+          </div>
+        )}
       </div>
     );
   }
