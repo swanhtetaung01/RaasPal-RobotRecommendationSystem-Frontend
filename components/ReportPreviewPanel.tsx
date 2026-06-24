@@ -24,7 +24,7 @@ import {
 import { robotUnitApi } from '@/lib/api';
 import { MonthlyReportView } from '@/components/report/MonthlyReportView';
 import { sampleGausiumReport } from '@/lib/reports/gausium';
-import { buildPreviewReport, monthRangeLabel } from '@/lib/reports/preview';
+import { buildPreviewReport, monthYearLabel } from '@/lib/reports/preview';
 import type { MonthlyPerformanceReport } from '@/lib/reports/types';
 import type { RobotUnitResponse } from '@/types/api';
 
@@ -69,13 +69,14 @@ export function ReportPreviewPanel() {
 
   const report: MonthlyPerformanceReport | null = useMemo(() => {
     if (!selection) return null;
-    const periodLabel = monthRangeLabel(month);
+    const periodLabel = monthYearLabel(month);
     if (selection.kind === 'sample') return { ...sampleGausiumReport, periodLabel };
     const r = selection.robot;
     return buildPreviewReport({
       customerName: r.deployment?.customerName ?? 'Unassigned customer',
       siteBranch: r.deployment?.site ?? '—',
-      robotName: `${robotDisplayName(r)} (${r.serialNumber})`,
+      robotName: robotDisplayName(r),
+      serialNumber: r.serialNumber,
       periodLabel,
     });
   }, [selection, month]);

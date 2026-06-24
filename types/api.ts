@@ -385,7 +385,7 @@ export interface CustomerResponse {
   industry: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
-  address: string | null;
+  branch: string | null;
   notes: string | null;
   /** Active deployments (robots) currently linked to this customer. */
   robotCount: number;
@@ -398,7 +398,7 @@ export interface CustomerRequest {
   industry?: string | null;
   contactEmail?: string | null;
   contactPhone?: string | null;
-  address?: string | null;
+  branch?: string | null;
   notes?: string | null;
 }
 

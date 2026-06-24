@@ -34,7 +34,7 @@ const EMPTY_FORM: CustomerRequest = {
   industry: '',
   contactEmail: '',
   contactPhone: '',
-  address: '',
+  branch: '',
   notes: '',
 };
 
@@ -44,7 +44,7 @@ function toForm(c: CustomerResponse): CustomerRequest {
     industry: c.industry ?? '',
     contactEmail: c.contactEmail ?? '',
     contactPhone: c.contactPhone ?? '',
-    address: c.address ?? '',
+    branch: c.branch ?? '',
     notes: c.notes ?? '',
   };
 }
@@ -149,8 +149,8 @@ export function CustomersPanel() {
               <input className={inputClass} value={form.industry ?? ''} onChange={(e) => field('industry', e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[var(--app-muted)]">Address</label>
-              <input className={inputClass} value={form.address ?? ''} onChange={(e) => field('address', e.target.value)} />
+              <label className="text-xs font-semibold text-[var(--app-muted)]">Branch</label>
+              <input className={inputClass} value={form.branch ?? ''} onChange={(e) => field('branch', e.target.value)} />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <label className="text-xs font-semibold text-[var(--app-muted)]">Notes</label>

@@ -1,173 +1,148 @@
 /**
- * MonthlyReportView — customer-facing Monthly Robot Performance Report.
+ * MonthlyReportView — RAASPAL "Executive Robot Performance Report" one-pager.
  *
- * Brand-agnostic, pure presentational Server Component: give it any
- * `MonthlyPerformanceReport` (e.g. a GausiumMonthlyReport) and it renders the
- * branded header info block plus Parts #1–#5. No client-side JS, no charting
- * library — the bar chart is plain CSS so it prints cleanly and never breaks on
- * a dependency upgrade. Colours come from the design tokens in globals.css
- * (brand teal = `primary`; traffic lights = `success` / `warning` / `danger`).
- *
- * Because every brand currently shares this 5-part layout, one shared view
- * renders them all. If a future brand needs a different layout, add a dedicated
- * view and select it by `report.brand`.
+ * Brand-agnostic, pure presentational Server Component matching the manager's
+ * slide layout: header (customer / site / robot / SN + red "customer needs to
+ * know" questions), Part 1 Executive Summary, Part 2 Operational Performance
+ * (two SVG ring gauges + task details), Part 3 Consumables Status (traffic-light
+ * %), and Recommendations. No client JS, no charting library — rings are SVG so
+ * the page prints cleanly and never breaks on a dependency upgrade.
  */
 import type {
   MonthlyPerformanceReport,
   HealthState,
-  ReportKpi,
-  PerformanceBar,
-  HealthItem,
-  Recommendation,
+  RingMetric,
+  ConsumableStatus,
+  ExecutiveSummary,
+  OperationalPerformance,
 } from '@/lib/reports/types';
-import {
-  Clock,
-  CheckCircle2,
-  MapPin,
-  Gauge,
-  Activity,
-  TrendingUp,
-  Sparkles,
-  ListChecks,
-  HeartPulse,
-  Wrench,
-  CalendarDays,
-  Building2,
-  Bot,
-  ShieldCheck,
-} from 'lucide-react';
 
-/* ─── Lookup tables ──────────────────────────────────────────────────────── */
+/* ─── Palette (matches the approved PowerPoint) ──────────────────────────── */
 
-const iconMap = {
-  clock: Clock,
-  tasks: CheckCircle2,
-  area: MapPin,
-  productivity: Gauge,
-  health: Activity,
-  saved: Clock,
-  improvement: TrendingUp,
-  cost: Sparkles,
-} as const;
-
-/** Traffic-light styling per health state (Part #4 + overall badge). */
-const HEALTH: Record<HealthState, { label: string; dot: string; text: string; chip: string }> = {
-  good: {
-    label: 'Good',
-    dot: 'bg-success',
-    text: 'text-success',
-    chip: 'bg-success/10 text-success border-success/30',
-  },
-  monitor: {
-    label: 'Monitor',
-    dot: 'bg-warning',
-    text: 'text-warning',
-    chip: 'bg-warning/10 text-warning border-warning/30',
-  },
-  action: {
-    label: 'Action Required',
-    dot: 'bg-danger',
-    text: 'text-danger',
-    chip: 'bg-danger/10 text-danger border-danger/30',
-  },
+const BLUE_PANEL = '#bcccea'; // section bars + info label cells
+const RING_ARC = '#4472c4';
+const RING_TRACK = '#dbe4f3';
+const DOT: Record<HealthState, string> = {
+  good: '#22b04b',
+  monitor: '#e0b100',
+  action: '#e23b34',
 };
 
-/** Performance-bar colour by threshold (higher = healthier). */
-function barColor(percent: number): string {
-  if (percent >= 85) return 'bg-success';
-  if (percent >= 70) return 'bg-warning';
-  return 'bg-danger';
-}
+/* ─── Building blocks ─────────────────────────────────────────────────────── */
 
-const PRIORITY: Record<NonNullable<Recommendation['priority']>, { label: string; chip: string }> = {
-  high: { label: 'High', chip: 'bg-danger/10 text-danger border-danger/30' },
-  medium: { label: 'Medium', chip: 'bg-warning/10 text-warning border-warning/30' },
-  low: { label: 'Low', chip: 'bg-info/10 text-info border-info/30' },
-  info: { label: 'Info', chip: 'bg-primary/10 text-primary border-primary/30' },
-};
-
-/* ─── Small building blocks ──────────────────────────────────────────────── */
-
-function PartHeader({
-  n,
-  title,
-  question,
-  Icon,
-}: {
-  n: number;
-  title: string;
-  question: string;
-  Icon: React.ComponentType<{ className?: string }>;
-}) {
+function SectionBar({ part, title }: { part: number; title: string }) {
   return (
-    <div className="mb-4 flex items-center gap-3">
-      <span className="rounded-md bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-        Part #{n}
-      </span>
-      <div>
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-          <Icon className="size-5 text-primary" />
-          {title}
-        </h2>
-        <p className="text-sm text-muted-foreground">{question}</p>
-      </div>
+    <div className="rounded-sm px-4 py-2 text-lg font-bold text-[#16243a]" style={{ backgroundColor: BLUE_PANEL }}>
+      Part {part} : {title}
     </div>
   );
 }
 
-function Section({ children }: { children: React.ReactNode }) {
+/** A 2-row info table with blue label cells (Customer/Site or Robot/SN). */
+function InfoTable({ rows }: { rows: [string, string][] }) {
   return (
-    <section className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
-      {children}
-    </section>
-  );
-}
-
-function KpiCard({ kpi }: { kpi: ReportKpi }) {
-  const Icon = iconMap[kpi.icon] ?? Activity;
-  return (
-    <div className="rounded-xl border border-border bg-background p-4">
-      <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        <Icon className="size-4 text-primary" />
-        <span>{kpi.label}</span>
-      </div>
-      <div className="mt-2 text-2xl font-bold text-foreground">{kpi.value}</div>
-      {kpi.hint && <div className="mt-1 text-xs text-muted-foreground">{kpi.hint}</div>}
+    <div className="overflow-hidden rounded-sm border border-white">
+      {rows.map(([label, value]) => (
+        <div key={label} className="flex border-b border-white last:border-0">
+          <div className="w-32 shrink-0 px-3 py-2 text-sm font-bold text-[#16243a]" style={{ backgroundColor: BLUE_PANEL }}>
+            {label}
+          </div>
+          <div className="flex-1 px-3 py-2 text-sm text-[#16243a]">{value || ' '}</div>
+        </div>
+      ))}
     </div>
   );
 }
 
-function PerfBar({ bar }: { bar: PerformanceBar }) {
+function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <div className="mb-1 flex items-center justify-between text-sm">
-        <span className="font-medium text-foreground">{bar.label}</span>
-        <span className="font-semibold text-foreground">{bar.percent}%</span>
-      </div>
-      <div className="h-3 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          className={`h-full rounded-full ${barColor(bar.percent)}`}
-          style={{ width: `${Math.min(100, Math.max(0, bar.percent))}%` }}
-        />
-      </div>
+    <div className="flex items-baseline gap-4 py-1.5">
+      <span className="w-48 shrink-0 text-[#16243a]">{label}</span>
+      <span className="font-semibold text-[#16243a]">{value}</span>
     </div>
   );
 }
 
-function HealthRow({ item }: { item: HealthItem }) {
-  const h = HEALTH[item.state];
+/** SVG donut gauge with the percentage centred. */
+function RingGauge({ metric }: { metric: RingMetric }) {
+  const radius = 52;
+  const circumference = 2 * Math.PI * radius;
+  const pct = Math.min(100, Math.max(0, metric.percent));
+  const dash = (pct / 100) * circumference;
+
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-border py-3 last:border-0">
-      <div className="flex items-center gap-3">
-        <span className={`size-3 shrink-0 rounded-full ${h.dot}`} aria-hidden />
-        <div>
-          <div className="text-sm font-medium text-foreground">{item.label}</div>
-          {item.note && <div className="text-xs text-muted-foreground">{item.note}</div>}
+    <div className="flex flex-col items-center">
+      <p className="mb-2 text-center text-sm font-medium text-[#16243a]">{metric.label}</p>
+      <div className="relative h-36 w-36">
+        <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90">
+          <circle cx="60" cy="60" r={radius} fill="none" stroke={RING_TRACK} strokeWidth="15" />
+          <circle
+            cx="60"
+            cy="60"
+            r={radius}
+            fill="none"
+            stroke={RING_ARC}
+            strokeWidth="15"
+            strokeLinecap="round"
+            strokeDasharray={`${dash} ${circumference}`}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center text-xl font-bold text-[#16243a]">
+          {pct.toFixed(2)}%
         </div>
       </div>
-      <span className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${h.chip}`}>
-        {h.label}
-      </span>
+    </div>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline gap-4">
+      <span className="w-36 shrink-0 text-[#16243a]">{label}</span>
+      <span className="text-[#16243a]">{value}</span>
+    </div>
+  );
+}
+
+function ConsumableRow({ item }: { item: ConsumableStatus }) {
+  return (
+    <div className="flex items-center gap-4 py-1.5">
+      <span className="w-28 shrink-0 text-[#16243a]">{item.label}</span>
+      <span className="h-4 w-4 shrink-0 rounded-full" style={{ backgroundColor: DOT[item.state] }} aria-hidden />
+      <span className="font-semibold text-[#16243a]">{item.percent}%</span>
+    </div>
+  );
+}
+
+/* ─── Sub-sections ────────────────────────────────────────────────────────── */
+
+function ExecutiveSummaryBlock({ s }: { s: ExecutiveSummary }) {
+  return (
+    <div className="px-2 text-[15px]">
+      <SummaryRow label="Total Tasks Completed" value={String(s.totalTasksCompleted)} />
+      <SummaryRow label="Total Operating Hours" value={s.totalOperatingTime} />
+      <SummaryRow label="Total Area Cleaned" value={`${s.totalAreaCleanedSqm} sqm`} />
+      <SummaryRow label="Average Productivity" value={`${s.averageProductivitySqmH} sqm/h`} />
+      <SummaryRow label="Water Consumption" value={`${s.waterConsumptionL} L`} />
+      <SummaryRow label="Battery Consumption" value={s.batteryConsumption} />
+    </div>
+  );
+}
+
+function OperationalBlock({ o }: { o: OperationalPerformance }) {
+  return (
+    <div className="px-2">
+      <div className="flex flex-wrap justify-center gap-8">
+        {o.rings.map((r) => (
+          <RingGauge key={r.label} metric={r} />
+        ))}
+      </div>
+      <div className="mt-6 space-y-1.5 text-[15px]">
+        <DetailRow label="Task Type" value={o.taskType} />
+        <DetailRow label="Task Status" value={o.taskStatus} />
+        <DetailRow label="Tasks per Day" value={o.tasksPerDay} />
+        <DetailRow label="Average Run Time" value={o.averageRunTime} />
+      </div>
     </div>
   );
 }
@@ -175,152 +150,95 @@ function HealthRow({ item }: { item: HealthItem }) {
 /* ─── Main view ──────────────────────────────────────────────────────────── */
 
 export function MonthlyReportView({ report }: { report: MonthlyPerformanceReport }) {
-  const overall = HEALTH[report.overallHealth];
-
   return (
-    <main className="min-h-dvh bg-background py-8 print:py-0">
-      <div className="mx-auto max-w-4xl space-y-6 px-4 sm:px-6">
-        {/* ── Branded header ────────────────────────────────────────────── */}
-        <header className="overflow-hidden rounded-2xl bg-aurora text-white shadow-sm">
-          <div className="p-6 sm:p-8">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="text-sm font-semibold uppercase tracking-widest text-white/70">
-                  RAASPAL
-                </div>
-                <h1 className="mt-1 text-2xl font-bold sm:text-3xl">
-                  Monthly Robot Performance Report
-                </h1>
+    <main className="min-h-dvh bg-[#eef1f6] py-8 print:bg-white print:py-0">
+      <div className="mx-auto max-w-5xl bg-white px-8 py-7 shadow-sm sm:px-10">
+        {/* ── Header ───────────────────────────────────────────────────────── */}
+        <div className="flex flex-wrap items-start justify-between gap-6">
+          <div>
+            <h1 className="text-2xl font-bold leading-tight text-[#16243a] sm:text-[28px]">
+              RAASPAL Executive Robot Performance Report
+            </h1>
+            <p className="mt-1 text-xl font-bold text-[#16243a]">{report.periodLabel}</p>
+          </div>
+
+          {/* Red "Customer needs to know" questions */}
+          <div className="text-[15px] font-semibold leading-7 text-[#e0202a]">
+            <p>Customer needs to know :</p>
+            {report.customerQuestions.map((q) => (
+              <p key={q}>{q}</p>
+            ))}
+          </div>
+        </div>
+
+        {/* Info boxes: customer/site + robot/SN */}
+        <div className="mt-6 grid gap-6 sm:grid-cols-2">
+          <InfoTable
+            rows={[
+              ['Customer', report.customerName],
+              ['Site / Branch', report.siteBranch],
+            ]}
+          />
+          <InfoTable
+            rows={[
+              ['Robot Name', report.robotName],
+              ['SN No.', report.serialNumber],
+            ]}
+          />
+        </div>
+
+        {/* ── Two-column body ──────────────────────────────────────────────── */}
+        <div className="mt-7 grid gap-x-10 gap-y-7 lg:grid-cols-2">
+          {/* Left: Part 1 + Part 3 */}
+          <div className="space-y-3">
+            <SectionBar part={1} title="Executive Summary" />
+            <ExecutiveSummaryBlock s={report.executive} />
+          </div>
+
+          {/* Right: Part 2 */}
+          <div className="space-y-3">
+            <SectionBar part={2} title="Operational Performance" />
+            <OperationalBlock o={report.operational} />
+          </div>
+
+          {/* Left: Part 3 Consumables */}
+          <div className="space-y-3">
+            <SectionBar part={3} title="Consumables Status" />
+            <div className="px-2 text-[15px]">
+              {report.consumables.map((c) => (
+                <ConsumableRow key={c.label} item={c} />
+              ))}
+            </div>
+          </div>
+
+          {/* Right: Recommendations */}
+          <div className="space-y-3">
+            <h2 className="px-1 text-lg font-bold text-[#16243a]">Recommendations :</h2>
+            {report.recommendations.length > 0 ? (
+              <ul className="space-y-2 px-2 text-[15px] text-[#16243a]">
+                {report.recommendations.map((rec, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span aria-hidden>•</span>
+                    <span>{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="space-y-4 px-2 pt-2">
+                <div className="border-b border-dotted border-[#16243a]" />
+                <div className="border-b border-dotted border-[#16243a]" />
               </div>
-              <span className="flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-sm font-semibold backdrop-blur">
-                <span className={`size-2.5 rounded-full ${overall.dot}`} aria-hidden />
-                {overall.label}
-              </span>
-            </div>
-
-            {/* Header info block: customer / site / robot / period */}
-            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <HeaderField Icon={Building2} label="Customer Name" value={report.customerName} />
-              <HeaderField Icon={MapPin} label="Site / Branch" value={report.siteBranch} />
-              <HeaderField Icon={Bot} label="Robot Name" value={report.robotName} />
-              <HeaderField Icon={CalendarDays} label="Reporting Period" value={report.periodLabel} />
-            </div>
+            )}
           </div>
-        </header>
+        </div>
 
-        {/* ── Part #1 — Executive Summary ───────────────────────────────── */}
-        <Section>
-          <PartHeader n={1} title="Executive Summary" question="What happened this month?" Icon={Activity} />
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-            {report.executiveSummary.map((kpi) => (
-              <KpiCard key={kpi.label} kpi={kpi} />
-            ))}
-          </div>
-        </Section>
-
-        {/* ── Part #2 — Value Delivered ─────────────────────────────────── */}
-        <Section>
-          <PartHeader n={2} title="Value Delivered" question="What value did the robot create?" Icon={Sparkles} />
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {report.valueDelivered.map((kpi) => (
-              <KpiCard key={kpi.label} kpi={kpi} />
-            ))}
-          </div>
-        </Section>
-
-        {/* ── Part #3 — Robot Performance (bar chart) ───────────────────── */}
-        <Section>
-          <PartHeader n={3} title="Robot Performance" question="How well did the robot perform?" Icon={Gauge} />
-          <div className="space-y-4">
-            {report.performance.map((bar) => (
-              <PerfBar key={bar.label} bar={bar} />
-            ))}
-          </div>
-          <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
-            <LegendDot className="bg-success" label="Strong (≥85%)" />
-            <LegendDot className="bg-warning" label="Moderate (70–84%)" />
-            <LegendDot className="bg-danger" label="Needs attention (<70%)" />
-          </div>
-        </Section>
-
-        {/* ── Part #4 — Robot Health Status (traffic light) ─────────────── */}
-        <Section>
-          <PartHeader n={4} title="Robot Health Status" question="Is the robot healthy?" Icon={HeartPulse} />
-          <div className="rounded-xl border border-border bg-background px-4">
-            {report.health.map((item) => (
-              <HealthRow key={item.label} item={item} />
-            ))}
-          </div>
-          {/* Traffic-light legend */}
-          <div className="mt-4 flex flex-wrap gap-4 text-xs">
-            <LegendDot className="bg-success" label="Good" />
-            <LegendDot className="bg-warning" label="Monitor" />
-            <LegendDot className="bg-danger" label="Action Required" />
-          </div>
-        </Section>
-
-        {/* ── Part #5 — Recommendations & Next Actions ──────────────────── */}
-        <Section>
-          <PartHeader n={5} title="Recommendations & Next Actions" question="What should be done next?" Icon={ListChecks} />
-          <ul className="space-y-3">
-            {report.recommendations.map((rec, i) => {
-              const p = PRIORITY[rec.priority ?? 'info'];
-              return (
-                <li key={i} className="flex items-start gap-3 rounded-xl border border-border bg-background p-3">
-                  <Wrench className="mt-0.5 size-4 shrink-0 text-primary" />
-                  <span className="flex-1 text-sm text-foreground">{rec.text}</span>
-                  <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${p.chip}`}>
-                    {p.label}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </Section>
-
-        {/* ── Footer / disclaimer ───────────────────────────────────────── */}
-        <footer className="flex items-start gap-2 px-1 pb-4 text-xs text-muted-foreground">
-          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
-          <p>
-            Figures are generated automatically from robot telemetry for the reporting period.
-            Final solution confirmation and any service action require RAASPAL verification
-            and/or an on-site survey. © {new Date().getFullYear()} RAASPAL.
-          </p>
-        </footer>
+        {/* Footer disclaimer */}
+        <p className="mt-8 border-t border-[#dbe4f3] pt-3 text-xs text-[#6b7785]">
+          Figures are generated automatically from robot telemetry for the reporting period. Final
+          confirmation and any service action require RAASPAL verification and/or an on-site survey.
+          © {new Date().getFullYear()} RAASPAL.
+        </p>
       </div>
     </main>
-  );
-}
-
-/* ─── Header field + legend helpers ──────────────────────────────────────── */
-
-function HeaderField({
-  Icon,
-  label,
-  value,
-}: {
-  Icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-start gap-3 rounded-xl bg-white/10 p-3 backdrop-blur">
-      <Icon className="mt-0.5 size-5 shrink-0 text-white/80" />
-      <div className="min-w-0">
-        <div className="text-xs font-medium uppercase tracking-wide text-white/70">{label}</div>
-        <div className="truncate text-sm font-semibold text-white" title={value}>
-          {value}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function LegendDot({ className, label }: { className: string; label: string }) {
-  return (
-    <span className="flex items-center gap-1.5 text-muted-foreground">
-      <span className={`size-2.5 rounded-full ${className}`} aria-hidden />
-      {label}
-    </span>
   );
 }
