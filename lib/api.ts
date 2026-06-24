@@ -280,3 +280,14 @@ export const reportApi = {
       params: { serialNumber, month },
     }),
 };
+
+// Telemetry — on-demand sync from the brand API (e.g. Gausium) into robot_task_reports
+export const telemetryApi = {
+  /** Pull a robot's task reports from its brand API for [from, to] ("YYYY-MM-DD"). */
+  sync: (serialNumber: string, from: string, to: string) =>
+    api.post<ApiResponse<{ serialNumber: string; saved: number; skipped: number }>>(
+      `/api/v1/telemetry/sync/${encodeURIComponent(serialNumber)}`,
+      null,
+      { params: { from, to } },
+    ),
+};

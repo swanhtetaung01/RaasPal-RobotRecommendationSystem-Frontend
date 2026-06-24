@@ -10,18 +10,21 @@
  * is for confirming layout, not live numbers.
  */
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  AlertTriangle,
   ArrowLeft,
   Bot,
   Building2,
+  CheckCircle2,
   FlaskConical,
   Loader2,
   MapPin,
+  RefreshCw,
   Search,
   Sparkles,
 } from 'lucide-react';
-import { reportApi, robotUnitApi } from '@/lib/api';
+import { reportApi, robotUnitApi, telemetryApi } from '@/lib/api';
 import { MonthlyReportView } from '@/components/report/MonthlyReportView';
 import { sampleGausiumReport } from '@/lib/reports/gausium';
 import { monthYearLabel } from '@/lib/reports/preview';
@@ -40,6 +43,18 @@ function previousMonth(): string {
 
 function robotDisplayName(r: RobotUnitResponse): string {
   return r.name ?? [r.brand, r.model].filter(Boolean).join(' ') ?? r.serialNumber;
+}
+
+/** "2026-06" → { from: "2026-06-01", to: "2026-06-30" } for the Gausium sync range. */
+function monthRange(month: string): { from: string; to: string } {
+  const [year, m] = month.split('-').map(Number);
+  const lastDay = new Date(year, m, 0).getDate();
+  return { from: `${month}-01`, to: `${month}-${String(lastDay).padStart(2, '0')}` };
+}
+
+function errorMessage(e: unknown, fallback: string): string {
+  const ax = e as { response?: { data?: { message?: string } } };
+  return ax?.response?.data?.message ?? fallback;
 }
 
 function matchesQuery(r: RobotUnitResponse, q: string): boolean {
@@ -81,6 +96,15 @@ export function ReportPreviewPanel() {
     enabled: !!robotSn,
   });
 
+  const queryClient = useQueryClient();
+  const syncMutation = useMutation({
+    mutationFn: () => {
+      const { from, to } = monthRange(month);
+      return telemetryApi.sync(robotSn!, from, to).then((r) => r.data);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['report-preview', robotSn, month] }),
+  });
+
   const report: MonthlyPerformanceReport | null | undefined =
     selection?.kind === 'sample'
       ? { ...sampleGausiumReport, periodLabel: monthYearLabel(month) }
@@ -100,17 +124,44 @@ export function ReportPreviewPanel() {
             Back to robots
           </button>
 
-          <label className="flex items-center gap-2 text-sm text-[var(--app-muted)]">
-            Report month
-            <input
-              type="month"
-              value={month}
-              max={maxMonth}
-              onChange={(e) => setMonth(e.target.value)}
-              className="h-9 rounded-lg border border-[var(--app-border)] bg-[var(--app-panel-alt)] px-3 text-sm text-[var(--app-text)] outline-none focus:border-[var(--app-brand)]"
-            />
-          </label>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-2 text-sm text-[var(--app-muted)]">
+              Report month
+              <input
+                type="month"
+                value={month}
+                max={maxMonth}
+                onChange={(e) => setMonth(e.target.value)}
+                className="h-9 rounded-lg border border-[var(--app-border)] bg-[var(--app-panel-alt)] px-3 text-sm text-[var(--app-text)] outline-none focus:border-[var(--app-brand)]"
+              />
+            </label>
+            {isRobot && (
+              <button
+                type="button"
+                onClick={() => syncMutation.mutate()}
+                disabled={syncMutation.isPending}
+                title="Pull this robot's task reports from the Gausium API for the selected month"
+                className="inline-flex items-center gap-2 rounded-lg bg-[var(--app-brand)] px-3 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+              >
+                {syncMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                {syncMutation.isPending ? 'Syncing…' : 'Sync from Gausium'}
+              </button>
+            )}
+          </div>
         </div>
+
+        {isRobot && syncMutation.isSuccess && (
+          <p className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            {syncMutation.data?.message ?? 'Sync complete.'}
+          </p>
+        )}
+        {isRobot && syncMutation.isError && (
+          <p className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            {errorMessage(syncMutation.error, 'Sync failed — check Gausium credentials and that the robot is bound to your account.')}
+          </p>
+        )}
 
         {selection.kind === 'sample' && (
           <div className="flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
