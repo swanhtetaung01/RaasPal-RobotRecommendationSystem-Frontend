@@ -376,6 +376,67 @@ export interface CvteDeviceSyncRequest {
   orgCode?: string;
 }
 
+/* ─── Customers ───────────────────────────────────────────────────────────── */
+/* Mirrors customer/dto/CustomerResponse + CustomerRequest on the backend. */
+
+export interface CustomerResponse {
+  id: string;
+  companyName: string;
+  industry: string | null;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  address: string | null;
+  notes: string | null;
+  /** Active deployments (robots) currently linked to this customer. */
+  robotCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CustomerRequest {
+  companyName: string;
+  industry?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  address?: string | null;
+  notes?: string | null;
+}
+
+/* ─── Robot units & deployments ───────────────────────────────────────────── */
+/* Mirrors robotunit/dto/RobotUnitResponse on the backend. */
+
+export type ReportCadence = 'MONTHLY' | 'WEEKLY' | 'OFF';
+
+/** The active deployment side of a robot link (its owning customer + cadence). */
+export interface DeploymentInfo {
+  deploymentId: string;
+  customerProfileId: string;
+  customerName: string;
+  site: string | null;
+  reportCadence: ReportCadence;
+  active: boolean;
+}
+
+export interface RobotUnitResponse {
+  id: string;
+  serialNumber: string;
+  brand: string;
+  model: string | null;
+  name: string | null;
+  /** Null when the robot is registered but not deployed to a customer. */
+  deployment: DeploymentInfo | null;
+}
+
+export interface RegisterRobotRequest {
+  serialNumber: string;
+  brand: string;
+  model?: string | null;
+  name?: string | null;
+  customerProfileId: string;
+  site?: string | null;
+  reportCadence?: ReportCadence | null;
+}
+
 /* ─── Monthly report automation ───────────────────────────────────────────── */
 /* Mirrors report/service/MonthlyReportSummary + report/delivery/MonthlyReportPayload. */
 
