@@ -79,8 +79,5 @@ export interface MonthlyPerformanceReport {
 
 /** The standard "customer needs to know" questions (red, top-right). */
 export const DEFAULT_CUSTOMER_QUESTIONS = [
-  'Robot ทำงานคุ้ม ?',
-  'ช่วยคนทำงานได้ ?',
-  'ทำงานเร็ว ?',
-  'มีปัญหา ?',
+  
 ];
