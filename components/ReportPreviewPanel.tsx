@@ -11,12 +11,14 @@
  */
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLocale } from 'next-intl';
 import {
   AlertTriangle,
   ArrowLeft,
   Bot,
   Building2,
   CheckCircle2,
+  ExternalLink,
   FlaskConical,
   Loader2,
   MapPin,
@@ -72,6 +74,7 @@ export function ReportPreviewPanel() {
   const [query, setQuery] = useState('');
   const [selection, setSelection] = useState<Selection | null>(null);
   const [month, setMonth] = useState(previousMonth);
+  const locale = useLocale();
 
   const maxMonth = useMemo(previousMonth, []);
 
@@ -103,6 +106,14 @@ export function ReportPreviewPanel() {
       return telemetryApi.sync(robotSn!, from, to).then((r) => r.data);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['report-preview', robotSn, month] }),
+  });
+
+  // Mint (or reuse) the public token and open the standalone customer link in a new tab.
+  const linkMutation = useMutation({
+    mutationFn: () => reportApi.createLink(robotSn!, month).then((r) => r.data.data),
+    onSuccess: (data) => {
+      if (data?.token) window.open(`/${locale}/report/${data.token}`, '_blank', 'noopener,noreferrer');
+    },
   });
 
   const report: MonthlyPerformanceReport | null | undefined =
@@ -145,6 +156,18 @@ export function ReportPreviewPanel() {
               >
                 {syncMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                 {syncMutation.isPending ? 'Syncing…' : 'Sync from Gausium'}
+              </button>
+            )}
+            {isRobot && (
+              <button
+                type="button"
+                onClick={() => linkMutation.mutate()}
+                disabled={linkMutation.isPending}
+                title="Open the standalone customer report link (real data) in a new tab — same link the monthly email uses"
+                className="inline-flex items-center gap-2 rounded-lg border border-[var(--app-border)] px-3 py-2 text-sm font-semibold text-[var(--app-brand-dark)] transition hover:border-[var(--app-brand)] disabled:opacity-50"
+              >
+                {linkMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
+                Open shareable link
               </button>
             )}
           </div>
@@ -199,6 +222,15 @@ export function ReportPreviewPanel() {
         <p className="mt-1 text-xs text-[var(--app-muted)]">
           Pick a robot to preview its monthly report page, or use sample data to confirm the format.
         </p>
+        <a
+          href={`/${locale}/report/example`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-[var(--app-border)] px-3 py-1.5 text-xs font-semibold text-[var(--app-brand-dark)] transition hover:border-[var(--app-brand)]"
+        >
+          <ExternalLink className="h-3.5 w-3.5" />
+          Open public example page (no login) — shareable with customers
+        </a>
       </div>
 
       {/* Sample shortcut */}

@@ -20,10 +20,9 @@ export function ToolsClient({ initialTab = 'monitor' }: { initialTab?: ToolTab }
   const tabs: { id: ToolTab; label: string; icon: React.ReactNode }[] = [
     { id: 'monitor', label: t('tabs.monitor'), icon: <Radio className="h-4 w-4" /> },
     { id: 'reports', label: t('tabs.reports'), icon: <CalendarClock className="h-4 w-4" /> },
-    // Plain labels (not i18n) so the new admin tabs work without touching all locale files.
-    { id: 'preview', label: 'Report Preview', icon: <FileSearch className="h-4 w-4" /> },
-    { id: 'customers', label: 'Customers', icon: <Users className="h-4 w-4" /> },
-    { id: 'robots', label: 'Robots', icon: <Bot className="h-4 w-4" /> },
+    { id: 'preview', label: t('tabs.preview'), icon: <FileSearch className="h-4 w-4" /> },
+    { id: 'customers', label: t('tabs.customers'), icon: <Users className="h-4 w-4" /> },
+    { id: 'robots', label: t('tabs.robots'), icon: <Bot className="h-4 w-4" /> },
   ];
 
   return (

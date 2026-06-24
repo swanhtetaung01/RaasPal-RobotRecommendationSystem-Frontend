@@ -74,8 +74,3 @@ export interface MonthlyPerformanceReport {
   consumables: ConsumableStatus[];
   recommendations: string[];
 }
-
-/** The standard "customer needs to know" questions (red, top-right). */
-export const DEFAULT_CUSTOMER_QUESTIONS = [
-  
-];

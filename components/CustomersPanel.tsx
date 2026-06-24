@@ -5,10 +5,12 @@
  *
  * List + search, add/edit via an inline form, and delete (blocked by the
  * backend when robots are still deployed to the customer). Customers have no
- * login account in this MVP, so this is plain record management.
+ * login account in this MVP, so this is plain record management. Labels are
+ * translated via next-intl ('customers' namespace).
  */
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import {
   AlertTriangle,
   Building2,
@@ -53,6 +55,7 @@ const inputClass =
   'h-10 w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-panel-alt)] px-3 text-sm text-[var(--app-text)] outline-none focus:border-[var(--app-brand)]';
 
 export function CustomersPanel() {
+  const t = useTranslations('customers');
   const queryClient = useQueryClient();
   const [query, setQuery] = useState('');
   /** null = list view; 'new' = add form; object = edit form. */
@@ -90,7 +93,7 @@ export function CustomersPanel() {
       refresh();
       setEditing(null);
     },
-    onError: (e) => setFormError(errorMessage(e, 'Could not save the customer.')),
+    onError: (e) => setFormError(errorMessage(e, t('saveError'))),
   });
 
   const deleteMutation = useMutation({
@@ -113,7 +116,7 @@ export function CustomersPanel() {
   function submit() {
     setFormError(null);
     if (!form.companyName.trim()) {
-      setFormError('Company name is required.');
+      setFormError(t('companyRequired'));
       return;
     }
     saveMutation.mutate(form);
@@ -128,32 +131,32 @@ export function CustomersPanel() {
       <div className="space-y-4">
         <div className="rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5">
           <p className="text-sm font-semibold text-[var(--app-text)]">
-            {editing === 'new' ? 'Add customer' : `Edit ${editing.companyName}`}
+            {editing === 'new' ? t('addCustomer') : t('editCustomer', { name: editing.companyName })}
           </p>
 
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5 sm:col-span-2">
-              <label className="text-xs font-semibold text-[var(--app-muted)]">Company name *</label>
+              <label className="text-xs font-semibold text-[var(--app-muted)]">{t('companyName')} *</label>
               <input className={inputClass} value={form.companyName} onChange={(e) => field('companyName', e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[var(--app-muted)]">Contact email</label>
+              <label className="text-xs font-semibold text-[var(--app-muted)]">{t('contactEmail')}</label>
               <input className={inputClass} type="email" value={form.contactEmail ?? ''} onChange={(e) => field('contactEmail', e.target.value)} placeholder="reports@customer.com" />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[var(--app-muted)]">Contact phone</label>
+              <label className="text-xs font-semibold text-[var(--app-muted)]">{t('contactPhone')}</label>
               <input className={inputClass} value={form.contactPhone ?? ''} onChange={(e) => field('contactPhone', e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[var(--app-muted)]">Industry</label>
+              <label className="text-xs font-semibold text-[var(--app-muted)]">{t('industry')}</label>
               <input className={inputClass} value={form.industry ?? ''} onChange={(e) => field('industry', e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[var(--app-muted)]">Branch</label>
+              <label className="text-xs font-semibold text-[var(--app-muted)]">{t('branch')}</label>
               <input className={inputClass} value={form.branch ?? ''} onChange={(e) => field('branch', e.target.value)} />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
-              <label className="text-xs font-semibold text-[var(--app-muted)]">Notes</label>
+              <label className="text-xs font-semibold text-[var(--app-muted)]">{t('notes')}</label>
               <textarea
                 className="min-h-20 w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-panel-alt)] px-3 py-2 text-sm text-[var(--app-text)] outline-none focus:border-[var(--app-brand)]"
                 value={form.notes ?? ''}
@@ -171,7 +174,7 @@ export function CustomersPanel() {
           <div className="mt-5 flex items-center gap-3">
             <Button type="button" onClick={submit} disabled={saveMutation.isPending} className="bg-[var(--app-brand)] text-white hover:opacity-90">
               {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {editing === 'new' ? 'Create customer' : 'Save changes'}
+              {editing === 'new' ? t('createCustomer') : t('saveChanges')}
             </Button>
             <Button
               type="button"
@@ -179,7 +182,7 @@ export function CustomersPanel() {
               disabled={saveMutation.isPending}
               className="border border-[var(--app-border)] bg-[var(--app-panel)] text-[var(--app-text)] hover:border-[var(--app-brand)]"
             >
-              Cancel
+              {t('cancel')}
             </Button>
           </div>
         </div>
@@ -197,37 +200,37 @@ export function CustomersPanel() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search customers…"
+            placeholder={t('searchPlaceholder')}
             className="h-11 w-full rounded-xl border border-[var(--app-border)] bg-[var(--app-panel-alt)] pl-10 pr-3 text-sm text-[var(--app-text)] outline-none focus:border-[var(--app-brand)]"
           />
         </div>
         <Button type="button" onClick={openAdd} className="bg-[var(--app-brand)] text-white hover:opacity-90">
-          <Plus className="h-4 w-4" /> Add customer
+          <Plus className="h-4 w-4" /> {t('addCustomer')}
         </Button>
       </div>
 
       {isLoading && (
         <div className="flex items-center gap-2 py-8 text-sm text-[var(--app-muted)]">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading customers…
+          <Loader2 className="h-4 w-4 animate-spin" /> {t('loading')}
         </div>
       )}
 
       {isError && (
         <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
-          Could not load customers. Check that you are signed in and the backend is running.
+          {t('loadError')}
         </p>
       )}
 
       {deleteMutation.isError && (
         <p className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-          {errorMessage(deleteMutation.error, 'Could not delete the customer.')}
+          {errorMessage(deleteMutation.error, t('deleteError'))}
         </p>
       )}
 
       {!isLoading && !isError && filtered.length === 0 && (
         <div className="rounded-xl border border-dashed border-[var(--app-border)] bg-[var(--app-panel)] py-10 text-center text-sm text-[var(--app-muted)]">
-          {customers.length === 0 ? 'No customers yet. Add your first one.' : 'No customers match your search.'}
+          {customers.length === 0 ? t('empty') : t('noMatch')}
         </div>
       )}
 
@@ -250,7 +253,7 @@ export function CustomersPanel() {
                 {c.contactPhone && (
                   <span className="inline-flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{c.contactPhone}</span>
                 )}
-                <span>{c.robotCount} robot{c.robotCount === 1 ? '' : 's'}</span>
+                <span>{t('robotCount', { count: c.robotCount })}</span>
               </div>
             </div>
 
@@ -258,7 +261,7 @@ export function CustomersPanel() {
               <button
                 type="button"
                 onClick={() => openEdit(c)}
-                aria-label={`Edit ${c.companyName}`}
+                aria-label={t('editAria', { name: c.companyName })}
                 className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--app-border)] text-[var(--app-muted)] transition hover:border-[var(--app-brand)] hover:text-[var(--app-brand-dark)]"
               >
                 <Pencil className="h-4 w-4" />
@@ -266,12 +269,12 @@ export function CustomersPanel() {
               <button
                 type="button"
                 onClick={() => {
-                  if (confirm(`Delete "${c.companyName}"? This cannot be undone.`)) {
+                  if (confirm(t('deleteConfirm', { name: c.companyName }))) {
                     deleteMutation.mutate(c.id);
                   }
                 }}
                 disabled={deleteMutation.isPending}
-                aria-label={`Delete ${c.companyName}`}
+                aria-label={t('deleteAria', { name: c.companyName })}
                 className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--app-border)] text-red-500 transition hover:border-red-400 hover:bg-red-50 disabled:opacity-50 dark:hover:bg-red-950/30"
               >
                 <Trash2 className="h-4 w-4" />

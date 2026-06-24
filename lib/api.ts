@@ -279,6 +279,16 @@ export const reportApi = {
     api.get<ApiResponse<MonthlyPerformanceReport>>('/api/v1/reports/preview', {
       params: { serialNumber, month },
     }),
+
+  /** Mint (or reuse) the shareable public link token for a robot+month. */
+  createLink: (serialNumber: string, month: string) =>
+    api.post<ApiResponse<{ token: string }>>('/api/v1/reports/links', null, {
+      params: { serialNumber, month },
+    }),
+
+  /** Public, no-auth report for a shared token (used by /report/{token}). */
+  publicReport: (token: string) =>
+    api.get<ApiResponse<MonthlyPerformanceReport>>(`/api/v1/reports/public/${encodeURIComponent(token)}`),
 };
 
 // Telemetry — on-demand sync from the brand API (e.g. Gausium) into robot_task_reports
