@@ -2,13 +2,16 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { CalendarClock, Radio } from 'lucide-react';
+import { Bot, CalendarClock, FileSearch, Radio, Users } from 'lucide-react';
 import { AppSidebar } from '@/components/AppSidebar';
 import { AppTopBar } from '@/components/AppTopBar';
 import { CvteMonitorPanel } from '@/components/CvteMonitorPanel';
+import { CustomersPanel } from '@/components/CustomersPanel';
+import { RobotsPanel } from '@/components/RobotsPanel';
 import { ReportAutomationPanel } from '@/components/ReportAutomationPanel';
+import { ReportPreviewPanel } from '@/components/ReportPreviewPanel';
 
-type ToolTab = 'monitor' | 'reports';
+type ToolTab = 'monitor' | 'reports' | 'preview' | 'customers' | 'robots';
 
 export function ToolsClient({ initialTab = 'monitor' }: { initialTab?: ToolTab }) {
   const t = useTranslations('tools');
@@ -17,6 +20,10 @@ export function ToolsClient({ initialTab = 'monitor' }: { initialTab?: ToolTab }
   const tabs: { id: ToolTab; label: string; icon: React.ReactNode }[] = [
     { id: 'monitor', label: t('tabs.monitor'), icon: <Radio className="h-4 w-4" /> },
     { id: 'reports', label: t('tabs.reports'), icon: <CalendarClock className="h-4 w-4" /> },
+    // Plain labels (not i18n) so the new admin tabs work without touching all locale files.
+    { id: 'preview', label: 'Report Preview', icon: <FileSearch className="h-4 w-4" /> },
+    { id: 'customers', label: 'Customers', icon: <Users className="h-4 w-4" /> },
+    { id: 'robots', label: 'Robots', icon: <Bot className="h-4 w-4" /> },
   ];
 
   return (
@@ -49,7 +56,11 @@ export function ToolsClient({ initialTab = 'monitor' }: { initialTab?: ToolTab }
               })}
             </div>
 
-            {tab === 'monitor' ? <CvteMonitorPanel /> : <ReportAutomationPanel />}
+            {tab === 'monitor' && <CvteMonitorPanel />}
+            {tab === 'reports' && <ReportAutomationPanel />}
+            {tab === 'preview' && <ReportPreviewPanel />}
+            {tab === 'customers' && <CustomersPanel />}
+            {tab === 'robots' && <RobotsPanel />}
           </div>
         </section>
       </div>

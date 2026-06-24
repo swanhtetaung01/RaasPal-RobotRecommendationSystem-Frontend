@@ -70,9 +70,14 @@ import type {
   RecommendationResponse,
   RequirementResponse,
   RobotImportResult,
+  CustomerRequest,
+  CustomerResponse,
   RobotRequest,
   RobotResponse,
   RobotType,
+  RobotUnitResponse,
+  RegisterRobotRequest,
+  ReportCadence,
   TestStatus,
   TranslationResponse,
   UserResponse,
@@ -113,6 +118,40 @@ export const robotApi = {
       { headers: { 'Content-Type': undefined }, params: { robotType, testStatus } },
     );
   },
+};
+
+// Customers (admin CRUD — report recipients, not login accounts)
+export const customerApi = {
+  list: () =>
+    api.get<ApiResponse<CustomerResponse[]>>('/api/v1/customers'),
+
+  getById: (id: string) =>
+    api.get<ApiResponse<CustomerResponse>>(`/api/v1/customers/${id}`),
+
+  create: (body: CustomerRequest) =>
+    api.post<ApiResponse<CustomerResponse>>('/api/v1/customers', body),
+
+  update: (id: string, body: CustomerRequest) =>
+    api.put<ApiResponse<CustomerResponse>>(`/api/v1/customers/${id}`, body),
+
+  delete: (id: string) =>
+    api.delete<ApiResponse<void>>(`/api/v1/customers/${id}`),
+};
+
+// Robot units & deployments (register robots, link to customers, set cadence)
+export const robotUnitApi = {
+  /** List robots: all, or filtered by `customerId` (→ that customer's robots) or `serialNumber` (→ the robot + its customer). */
+  list: (params?: { customerId?: string; serialNumber?: string }) =>
+    api.get<ApiResponse<RobotUnitResponse[]>>('/api/v1/robot-units', { params }),
+
+  register: (body: RegisterRobotRequest) =>
+    api.post<ApiResponse<RobotUnitResponse>>('/api/v1/robot-units', body),
+
+  updateCadence: (deploymentId: string, reportCadence: ReportCadence) =>
+    api.patch<ApiResponse<RobotUnitResponse>>(`/api/v1/robot-units/deployments/${deploymentId}/cadence`, { reportCadence }),
+
+  deactivate: (deploymentId: string) =>
+    api.delete<ApiResponse<void>>(`/api/v1/robot-units/deployments/${deploymentId}`),
 };
 
 // Auth
