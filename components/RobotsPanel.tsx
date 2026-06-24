@@ -5,10 +5,11 @@
  *
  * Register a robot by serial number, link it to a customer (dropdown), set its
  * report cadence, and manage the list (change cadence inline, or deactivate).
- * Pairs with CustomersPanel: a robot must be deployed to an existing customer.
+ * Pairs with CustomersPanel. Labels are translated via next-intl ('robots').
  */
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import {
   AlertTriangle,
   Bot,
@@ -25,6 +26,11 @@ import type { RegisterRobotRequest, ReportCadence, RobotUnitResponse } from '@/t
 
 const BRANDS = ['GAUSIUM', 'KEENON', 'CENOBOT'];
 const CADENCES: ReportCadence[] = ['MONTHLY', 'WEEKLY', 'OFF'];
+const CADENCE_KEY: Record<ReportCadence, string> = {
+  MONTHLY: 'cadenceMonthly',
+  WEEKLY: 'cadenceWeekly',
+  OFF: 'cadenceOff',
+};
 
 function errorMessage(e: unknown, fallback: string): string {
   const ax = e as { response?: { data?: { message?: string } } };
@@ -49,11 +55,14 @@ const EMPTY_FORM: RegisterRobotRequest = {
 };
 
 export function RobotsPanel() {
+  const t = useTranslations('robotsPanel');
   const queryClient = useQueryClient();
   const [query, setQuery] = useState('');
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState<RegisterRobotRequest>(EMPTY_FORM);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const cadenceLabel = (c: ReportCadence) => t(CADENCE_KEY[c]);
 
   const { data: robots = [], isLoading, isError } = useQuery({
     queryKey: ['robot-units'],
@@ -88,7 +97,7 @@ export function RobotsPanel() {
       setAdding(false);
       setForm(EMPTY_FORM);
     },
-    onError: (e) => setFormError(errorMessage(e, 'Could not register the robot.')),
+    onError: (e) => setFormError(errorMessage(e, t('registerError'))),
   });
 
   const cadenceMutation = useMutation({
@@ -104,9 +113,9 @@ export function RobotsPanel() {
 
   function submit() {
     setFormError(null);
-    if (!form.serialNumber.trim()) return setFormError('Serial number is required.');
-    if (!form.brand?.trim()) return setFormError('Brand is required.');
-    if (!form.customerProfileId) return setFormError('Please choose a customer.');
+    if (!form.serialNumber.trim()) return setFormError(t('serialRequired'));
+    if (!form.brand?.trim()) return setFormError(t('brandRequired'));
+    if (!form.customerProfileId) return setFormError(t('customerRequired'));
     registerMutation.mutate(form);
   }
 
@@ -117,22 +126,22 @@ export function RobotsPanel() {
 
     return (
       <div className="rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5">
-        <p className="text-sm font-semibold text-[var(--app-text)]">Register robot</p>
+        <p className="text-sm font-semibold text-[var(--app-text)]">{t('registerRobot')}</p>
 
         {customers.length === 0 && (
           <p className="mt-3 flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
             <AlertTriangle className="h-4 w-4 shrink-0" />
-            No customers yet — add one in the Customers tab first, then register a robot to them.
+            {t('noCustomers')}
           </p>
         )}
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[var(--app-muted)]">Serial number *</label>
+            <label className="text-xs font-semibold text-[var(--app-muted)]">{t('serialNumber')} *</label>
             <input className={inputClass} value={form.serialNumber} onChange={(e) => field('serialNumber', e.target.value)} placeholder="GS401-XXXX-0001" />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[var(--app-muted)]">Brand *</label>
+            <label className="text-xs font-semibold text-[var(--app-muted)]">{t('brand')} *</label>
             <select className={inputClass} value={form.brand} onChange={(e) => field('brand', e.target.value)}>
               {BRANDS.map((b) => (
                 <option key={b} value={b}>{b}</option>
@@ -140,31 +149,31 @@ export function RobotsPanel() {
             </select>
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[var(--app-muted)]">Model</label>
+            <label className="text-xs font-semibold text-[var(--app-muted)]">{t('model')}</label>
             <input className={inputClass} value={form.model ?? ''} onChange={(e) => field('model', e.target.value)} placeholder="Scrubber 50 Pro" />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[var(--app-muted)]">Name / label</label>
-            <input className={inputClass} value={form.name ?? ''} onChange={(e) => field('name', e.target.value)} placeholder="Lobby scrubber" />
+            <label className="text-xs font-semibold text-[var(--app-muted)]">{t('nameLabel')}</label>
+            <input className={inputClass} value={form.name ?? ''} onChange={(e) => field('name', e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[var(--app-muted)]">Customer *</label>
+            <label className="text-xs font-semibold text-[var(--app-muted)]">{t('customer')} *</label>
             <select className={inputClass} value={form.customerProfileId} onChange={(e) => field('customerProfileId', e.target.value)}>
-              <option value="">Select a customer…</option>
+              <option value="">{t('selectCustomer')}</option>
               {customers.map((c) => (
                 <option key={c.id} value={c.id}>{c.companyName}</option>
               ))}
             </select>
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[var(--app-muted)]">Site / branch</label>
-            <input className={inputClass} value={form.site ?? ''} onChange={(e) => field('site', e.target.value)} placeholder="Ground Floor Atrium" />
+            <label className="text-xs font-semibold text-[var(--app-muted)]">{t('site')}</label>
+            <input className={inputClass} value={form.site ?? ''} onChange={(e) => field('site', e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[var(--app-muted)]">Report cadence</label>
+            <label className="text-xs font-semibold text-[var(--app-muted)]">{t('reportCadence')}</label>
             <select className={inputClass} value={form.reportCadence ?? 'MONTHLY'} onChange={(e) => field('reportCadence', e.target.value)}>
               {CADENCES.map((c) => (
-                <option key={c} value={c}>{c.charAt(0) + c.slice(1).toLowerCase()}</option>
+                <option key={c} value={c}>{cadenceLabel(c)}</option>
               ))}
             </select>
           </div>
@@ -179,7 +188,7 @@ export function RobotsPanel() {
         <div className="mt-5 flex items-center gap-3">
           <Button type="button" onClick={submit} disabled={registerMutation.isPending} className="bg-[var(--app-brand)] text-white hover:opacity-90">
             {registerMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Register robot
+            {t('registerRobot')}
           </Button>
           <Button
             type="button"
@@ -187,7 +196,7 @@ export function RobotsPanel() {
             disabled={registerMutation.isPending}
             className="border border-[var(--app-border)] bg-[var(--app-panel)] text-[var(--app-text)] hover:border-[var(--app-brand)]"
           >
-            Cancel
+            {t('cancel')}
           </Button>
         </div>
       </div>
@@ -204,30 +213,30 @@ export function RobotsPanel() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by serial number, robot, or customer…"
+            placeholder={t('searchPlaceholder')}
             className="h-11 w-full rounded-xl border border-[var(--app-border)] bg-[var(--app-panel-alt)] pl-10 pr-3 text-sm text-[var(--app-text)] outline-none focus:border-[var(--app-brand)]"
           />
         </div>
         <Button type="button" onClick={() => { setForm(EMPTY_FORM); setFormError(null); setAdding(true); }} className="bg-[var(--app-brand)] text-white hover:opacity-90">
-          <Plus className="h-4 w-4" /> Register robot
+          <Plus className="h-4 w-4" /> {t('registerRobot')}
         </Button>
       </div>
 
       {isLoading && (
         <div className="flex items-center gap-2 py-8 text-sm text-[var(--app-muted)]">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading robots…
+          <Loader2 className="h-4 w-4 animate-spin" /> {t('loading')}
         </div>
       )}
 
       {isError && (
         <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
-          Could not load robots. Check that you are signed in and the backend is running.
+          {t('loadError')}
         </p>
       )}
 
       {!isLoading && !isError && filtered.length === 0 && (
         <div className="rounded-xl border border-dashed border-[var(--app-border)] bg-[var(--app-panel)] py-10 text-center text-sm text-[var(--app-muted)]">
-          {robots.length === 0 ? 'No robots registered yet. Register your first one.' : 'No robots match your search.'}
+          {robots.length === 0 ? t('empty') : t('noMatch')}
         </div>
       )}
 
@@ -246,7 +255,7 @@ export function RobotsPanel() {
               <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--app-muted)]">
                 <span className="inline-flex items-center gap-1">
                   <Building2 className="h-3.5 w-3.5" />
-                  {r.deployment?.customerName ?? 'Unassigned'}
+                  {r.deployment?.customerName ?? t('unassigned')}
                 </span>
                 {r.deployment?.site && (
                   <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{r.deployment.site}</span>
@@ -257,7 +266,7 @@ export function RobotsPanel() {
             {r.deployment ? (
               <div className="flex items-center gap-2">
                 <select
-                  aria-label={`Report cadence for ${robotDisplayName(r)}`}
+                  aria-label={t('cadenceAria', { name: robotDisplayName(r) })}
                   value={r.deployment.reportCadence}
                   disabled={cadenceMutation.isPending}
                   onChange={(e) =>
@@ -266,18 +275,18 @@ export function RobotsPanel() {
                   className="h-9 rounded-lg border border-[var(--app-border)] bg-[var(--app-panel-alt)] px-2 text-xs font-semibold text-[var(--app-text)] outline-none focus:border-[var(--app-brand)]"
                 >
                   {CADENCES.map((c) => (
-                    <option key={c} value={c}>{c.charAt(0) + c.slice(1).toLowerCase()}</option>
+                    <option key={c} value={c}>{cadenceLabel(c)}</option>
                   ))}
                 </select>
                 <button
                   type="button"
                   onClick={() => {
-                    if (confirm(`Deactivate "${robotDisplayName(r)}" at ${r.deployment?.customerName}? It will stop being reported on.`)) {
+                    if (confirm(t('deactivateConfirm', { name: robotDisplayName(r), customer: r.deployment?.customerName ?? '' }))) {
                       deactivateMutation.mutate(r.deployment!.deploymentId);
                     }
                   }}
                   disabled={deactivateMutation.isPending}
-                  aria-label={`Deactivate ${robotDisplayName(r)}`}
+                  aria-label={t('deactivateAria', { name: robotDisplayName(r) })}
                   className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--app-border)] text-red-500 transition hover:border-red-400 hover:bg-red-50 disabled:opacity-50 dark:hover:bg-red-950/30"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -285,7 +294,7 @@ export function RobotsPanel() {
               </div>
             ) : (
               <span className="rounded-full border border-[var(--app-border)] px-2.5 py-1 text-xs font-semibold text-[var(--app-muted)]">
-                Inactive
+                {t('inactive')}
               </span>
             )}
           </li>

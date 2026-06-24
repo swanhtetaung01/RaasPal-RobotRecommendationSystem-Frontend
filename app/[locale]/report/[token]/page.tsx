@@ -1,27 +1,22 @@
 /**
  * /[locale]/report/[token] — public, customer-facing monthly report page.
  *
- * Reached from the link in the customer's monthly email. It is PUBLIC (no login)
- * — `/report` is whitelisted in proxy.ts — because customers don't have accounts.
- * The `token` is an unguessable id that will key the real data fetch:
- *
- *   const report = await fetchPublicReport(token); // GET /api/v1/reports/public/{token}
- *
- * Until that backend endpoint exists, we render brand-specific sample data so the
- * layout can be previewed at /en/report/demo. The view is brand-agnostic; pick
- * the sample/entity by brand once multiple brands report.
+ * PUBLIC (no login) — `/report` is whitelisted in proxy.ts, and the backend
+ * `/api/v1/reports/public/{token}` endpoint is whitelisted in SecurityConfig.
+ * This is the SAME URL the customer's monthly email links to. The page is
+ * close-only: there is no in-app navigation, just the report + a language
+ * switcher. Token "example" renders the sample layout.
  */
-import { MonthlyReportView } from '@/components/report/MonthlyReportView';
-import { sampleGausiumReport } from '@/lib/reports/gausium';
+import { setRequestLocale } from 'next-intl/server';
+import { PublicReportClient } from './PublicReportClient';
 
 export default async function ReportPage({
   params,
 }: {
   params: Promise<{ locale: string; token: string }>;
 }) {
-  // token will select the real report; unused while previewing sample data.
-  const { token } = await params;
-  void token;
+  const { locale, token } = await params;
+  setRequestLocale(locale); // prime locale so report labels translate
 
-  return <MonthlyReportView report={sampleGausiumReport} />;
+  return <PublicReportClient token={token} />;
 }

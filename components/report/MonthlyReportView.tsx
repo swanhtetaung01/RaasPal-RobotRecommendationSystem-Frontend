@@ -1,13 +1,17 @@
 /**
  * MonthlyReportView — RAASPAL "Executive Robot Performance Report" one-pager.
  *
- * Brand-agnostic, pure presentational Server Component matching the manager's
- * slide layout: header (customer / site / robot / SN + red "customer needs to
- * know" questions), Part 1 Executive Summary, Part 2 Operational Performance
- * (two SVG ring gauges + task details), Part 3 Consumables Status (traffic-light
- * %), and Recommendations. No client JS, no charting library — rings are SVG so
- * the page prints cleanly and never breaks on a dependency upgrade.
+ * Brand-agnostic, pure presentational component matching the manager's slide
+ * layout: header (customer / site / robot / SN), Part 1 Executive Summary,
+ * Part 2 Operational Performance (two SVG ring gauges + task details), Part 3
+ * Consumables Status (traffic-light %), and Recommendations.
+ *
+ * Labels are translated via next-intl ('report' namespace) so the page follows
+ * the active locale (with a switcher on the public page). Data values (names,
+ * counts, breakdowns) come from the backend and are shown as-is; well-known
+ * ring/consumable labels are mapped to translated terms, others fall through.
  */
+import { useTranslations } from 'next-intl';
 import type {
   MonthlyPerformanceReport,
   HealthState,
@@ -19,7 +23,7 @@ import type {
 
 /* ─── Palette (matches the approved PowerPoint) ──────────────────────────── */
 
-const BLUE_PANEL = '#bcccea'; // section bars + info label cells
+const BLUE_PANEL = '#bcccea';
 const RING_ARC = '#4472c4';
 const RING_TRACK = '#dbe4f3';
 const DOT: Record<HealthState, string> = {
@@ -28,12 +32,23 @@ const DOT: Record<HealthState, string> = {
   action: '#e23b34',
 };
 
+/** Map well-known backend labels to translation keys (fallback: raw value). */
+const RING_KEYS: Record<string, string> = {
+  'Task Completion Rate': 'taskCompletionRate',
+  'Cleaning Coverage Rate': 'cleaningCoverageRate',
+};
+const CONSUMABLE_KEYS: Record<string, string> = {
+  Brush: 'brush',
+  Filter: 'filter',
+  Squeegee: 'squeegee',
+};
+
 /* ─── Building blocks ─────────────────────────────────────────────────────── */
 
-function SectionBar({ part, title }: { part: number; title: string }) {
+function SectionBar({ heading }: { heading: string }) {
   return (
     <div className="rounded-sm px-4 py-2 text-lg font-bold text-[#16243a]" style={{ backgroundColor: BLUE_PANEL }}>
-      Part {part} : {title}
+      {heading}
     </div>
   );
 }
@@ -47,7 +62,7 @@ function InfoTable({ rows }: { rows: [string, string][] }) {
           <div className="w-32 shrink-0 px-3 py-2 text-sm font-bold text-[#16243a]" style={{ backgroundColor: BLUE_PANEL }}>
             {label}
           </div>
-          <div className="flex-1 px-3 py-2 text-sm text-[#16243a]">{value || ' '}</div>
+          <div className="flex-1 px-3 py-2 text-sm text-[#16243a]">{value || ' '}</div>
         </div>
       ))}
     </div>
@@ -64,15 +79,15 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 }
 
 /** SVG donut gauge with the percentage centred. */
-function RingGauge({ metric }: { metric: RingMetric }) {
+function RingGauge({ label, percent }: { label: string; percent: number }) {
   const radius = 52;
   const circumference = 2 * Math.PI * radius;
-  const pct = Math.min(100, Math.max(0, metric.percent));
+  const pct = Math.min(100, Math.max(0, percent));
   const dash = (pct / 100) * circumference;
 
   return (
     <div className="flex flex-col items-center">
-      <p className="mb-2 text-center text-sm font-medium text-[#16243a]">{metric.label}</p>
+      <p className="mb-2 text-center text-sm font-medium text-[#16243a]">{label}</p>
       <div className="relative h-36 w-36">
         <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90">
           <circle cx="60" cy="60" r={radius} fill="none" stroke={RING_TRACK} strokeWidth="15" />
@@ -105,9 +120,11 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 }
 
 function ConsumableRow({ item }: { item: ConsumableStatus }) {
+  const t = useTranslations('report');
+  const label = CONSUMABLE_KEYS[item.label] ? t(CONSUMABLE_KEYS[item.label]) : item.label;
   return (
     <div className="flex items-center gap-4 py-1.5">
-      <span className="w-28 shrink-0 text-[#16243a]">{item.label}</span>
+      <span className="w-28 shrink-0 text-[#16243a]">{label}</span>
       <span className="h-4 w-4 shrink-0 rounded-full" style={{ backgroundColor: DOT[item.state] }} aria-hidden />
       <span className="font-semibold text-[#16243a]">{item.percent}%</span>
     </div>
@@ -117,31 +134,34 @@ function ConsumableRow({ item }: { item: ConsumableStatus }) {
 /* ─── Sub-sections ────────────────────────────────────────────────────────── */
 
 function ExecutiveSummaryBlock({ s }: { s: ExecutiveSummary }) {
+  const t = useTranslations('report');
   return (
     <div className="px-2 text-[15px]">
-      <SummaryRow label="Total Tasks Completed" value={String(s.totalTasksCompleted)} />
-      <SummaryRow label="Total Operating Hours" value={s.totalOperatingTime} />
-      <SummaryRow label="Total Area Cleaned" value={`${s.totalAreaCleanedSqm} sqm`} />
-      <SummaryRow label="Average Productivity" value={`${s.averageProductivitySqmH} sqm/h`} />
-      <SummaryRow label="Water Consumption" value={`${s.waterConsumptionL} L`} />
-      <SummaryRow label="Battery Consumption" value={s.batteryConsumption} />
+      <SummaryRow label={t('totalTasksCompleted')} value={String(s.totalTasksCompleted)} />
+      <SummaryRow label={t('totalOperatingHours')} value={s.totalOperatingTime} />
+      <SummaryRow label={t('totalAreaCleaned')} value={`${s.totalAreaCleanedSqm} sqm`} />
+      <SummaryRow label={t('averageProductivity')} value={`${s.averageProductivitySqmH} sqm/h`} />
+      <SummaryRow label={t('waterConsumption')} value={`${s.waterConsumptionL} L`} />
+      <SummaryRow label={t('batteryConsumption')} value={s.batteryConsumption} />
     </div>
   );
 }
 
 function OperationalBlock({ o }: { o: OperationalPerformance }) {
+  const t = useTranslations('report');
+  const ringLabel = (r: RingMetric) => (RING_KEYS[r.label] ? t(RING_KEYS[r.label]) : r.label);
   return (
     <div className="px-2">
       <div className="flex flex-wrap justify-center gap-8">
         {o.rings.map((r) => (
-          <RingGauge key={r.label} metric={r} />
+          <RingGauge key={r.label} label={ringLabel(r)} percent={r.percent} />
         ))}
       </div>
       <div className="mt-6 space-y-1.5 text-[15px]">
-        <DetailRow label="Task Type" value={o.taskType} />
-        <DetailRow label="Task Status" value={o.taskStatus} />
-        <DetailRow label="Tasks per Day" value={o.tasksPerDay} />
-        <DetailRow label="Average Run Time" value={o.averageRunTime} />
+        <DetailRow label={t('taskType')} value={o.taskType} />
+        <DetailRow label={t('taskStatus')} value={o.taskStatus} />
+        <DetailRow label={t('tasksPerDay')} value={o.tasksPerDay} />
+        <DetailRow label={t('averageRunTime')} value={o.averageRunTime} />
       </div>
     </div>
   );
@@ -150,54 +170,49 @@ function OperationalBlock({ o }: { o: OperationalPerformance }) {
 /* ─── Main view ──────────────────────────────────────────────────────────── */
 
 export function MonthlyReportView({ report }: { report: MonthlyPerformanceReport }) {
+  const t = useTranslations('report');
+
   return (
     <main className="min-h-dvh bg-[#eef1f6] py-8 print:bg-white print:py-0">
       <div className="mx-auto max-w-5xl bg-white px-8 py-7 shadow-sm sm:px-10">
         {/* ── Header ───────────────────────────────────────────────────────── */}
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
-            <h1 className="text-2xl font-bold leading-tight text-[#16243a] sm:text-[28px]">
-              RAASPAL Executive Robot Performance Report
-            </h1>
+            <h1 className="text-2xl font-bold leading-tight text-[#16243a] sm:text-[28px]">{t('title')}</h1>
             <p className="mt-1 text-xl font-bold text-[#16243a]">{report.periodLabel}</p>
           </div>
-
-        
         </div>
 
         {/* Info boxes: customer/site + robot/SN */}
         <div className="mt-6 grid gap-6 sm:grid-cols-2">
           <InfoTable
             rows={[
-              ['Customer', report.customerName],
-              ['Site / Branch', report.siteBranch],
+              [t('customer'), report.customerName],
+              [t('siteBranch'), report.siteBranch],
             ]}
           />
           <InfoTable
             rows={[
-              ['Robot Name', report.robotName],
-              ['SN No.', report.serialNumber],
+              [t('robotName'), report.robotName],
+              [t('snNo'), report.serialNumber],
             ]}
           />
         </div>
 
         {/* ── Two-column body ──────────────────────────────────────────────── */}
         <div className="mt-7 grid gap-x-10 gap-y-7 lg:grid-cols-2">
-          {/* Left: Part 1 + Part 3 */}
           <div className="space-y-3">
-            <SectionBar part={1} title="Executive Summary" />
+            <SectionBar heading={`${t('part')} 1 : ${t('executiveSummary')}`} />
             <ExecutiveSummaryBlock s={report.executive} />
           </div>
 
-          {/* Right: Part 2 */}
           <div className="space-y-3">
-            <SectionBar part={2} title="Operational Performance" />
+            <SectionBar heading={`${t('part')} 2 : ${t('operationalPerformance')}`} />
             <OperationalBlock o={report.operational} />
           </div>
 
-          {/* Left: Part 3 Consumables */}
           <div className="space-y-3">
-            <SectionBar part={3} title="Consumables Status" />
+            <SectionBar heading={`${t('part')} 3 : ${t('consumablesStatus')}`} />
             <div className="px-2 text-[15px]">
               {report.consumables.map((c) => (
                 <ConsumableRow key={c.label} item={c} />
@@ -205,9 +220,8 @@ export function MonthlyReportView({ report }: { report: MonthlyPerformanceReport
             </div>
           </div>
 
-          {/* Right: Recommendations */}
           <div className="space-y-3">
-            <h2 className="px-1 text-lg font-bold text-[#16243a]">Recommendations :</h2>
+            <h2 className="px-1 text-lg font-bold text-[#16243a]">{t('recommendations')} :</h2>
             {report.recommendations.length > 0 ? (
               <ul className="space-y-2 px-2 text-[15px] text-[#16243a]">
                 {report.recommendations.map((rec, i) => (
@@ -228,9 +242,7 @@ export function MonthlyReportView({ report }: { report: MonthlyPerformanceReport
 
         {/* Footer disclaimer */}
         <p className="mt-8 border-t border-[#dbe4f3] pt-3 text-xs text-[#6b7785]">
-          Figures are generated automatically from robot telemetry for the reporting period. Final
-          confirmation and any service action require RAASPAL verification and/or an on-site survey.
-          © {new Date().getFullYear()} RAASPAL.
+          {t('disclaimer')} © {new Date().getFullYear()} RAASPAL.
         </p>
       </div>
     </main>
