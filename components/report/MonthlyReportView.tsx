@@ -162,13 +162,7 @@ export function MonthlyReportView({ report }: { report: MonthlyPerformanceReport
             <p className="mt-1 text-xl font-bold text-[#16243a]">{report.periodLabel}</p>
           </div>
 
-          {/* Red "Customer needs to know" questions */}
-          <div className="text-[15px] font-semibold leading-7 text-[#e0202a]">
-            <p>Customer needs to know :</p>
-            {report.customerQuestions.map((q) => (
-              <p key={q}>{q}</p>
-            ))}
-          </div>
+        
         </div>
 
         {/* Info boxes: customer/site + robot/SN */}

@@ -7,7 +7,7 @@
  * `sampleGausiumReport` mirrors the manager's mockup values so the page can be
  * previewed before live telemetry is wired. It invents no real specs or prices.
  */
-import { DEFAULT_CUSTOMER_QUESTIONS, type MonthlyPerformanceReport } from './types';
+import { type MonthlyPerformanceReport } from './types';
 
 /** Gausium-specific monthly report. Brand is pinned to 'GAUSIUM'. */
 export interface GausiumMonthlyReport extends MonthlyPerformanceReport {
@@ -22,7 +22,6 @@ export const sampleGausiumReport: GausiumMonthlyReport = {
   robotName: 'Gausium Scrubber 50',
   serialNumber: 'GS50-2210-0457',
   periodLabel: 'June 2026',
-  customerQuestions: DEFAULT_CUSTOMER_QUESTIONS,
 
   executive: {
     totalTasksCompleted: 3,

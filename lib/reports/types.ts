@@ -69,8 +69,6 @@ export interface MonthlyPerformanceReport {
   serialNumber: string;
   /** Reporting period shown under the title, e.g. "June 2026". */
   periodLabel: string;
-  /** Red "Customer needs to know:" questions in the top-right of the report. */
-  customerQuestions: string[];
   executive: ExecutiveSummary;
   operational: OperationalPerformance;
   consumables: ConsumableStatus[];
