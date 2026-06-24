@@ -11,6 +11,7 @@
  * counts, breakdowns) come from the backend and are shown as-is; well-known
  * ring/consumable labels are mapped to translated terms, others fall through.
  */
+import { Fragment } from 'react';
 import { useTranslations } from 'next-intl';
 import type {
   MonthlyPerformanceReport,
@@ -53,17 +54,26 @@ function SectionBar({ heading }: { heading: string }) {
   );
 }
 
-/** A 2-row info table with blue label cells (Customer/Site or Robot/SN). */
+/**
+ * A 2-row info table (Customer/Site or Robot/SN). The label column auto-sizes to
+ * its widest label via `max-content`, so longer translated labels (e.g. Thai
+ * "หมายเลขเครื่อง (SN)") stay on one line instead of wrapping.
+ */
 function InfoTable({ rows }: { rows: [string, string][] }) {
   return (
-    <div className="overflow-hidden rounded-sm border border-white">
-      {rows.map(([label, value]) => (
-        <div key={label} className="flex border-b border-white last:border-0">
-          <div className="w-32 shrink-0 px-3 py-2 text-sm font-bold text-[#16243a]" style={{ backgroundColor: BLUE_PANEL }}>
+    <div className="grid grid-cols-[max-content_1fr] overflow-hidden rounded-sm border border-white">
+      {rows.map(([label, value], i) => (
+        <Fragment key={label}>
+          <div
+            className={`px-3 py-2 text-sm font-bold text-[#16243a] ${i > 0 ? 'border-t border-white' : ''}`}
+            style={{ backgroundColor: BLUE_PANEL }}
+          >
             {label}
           </div>
-          <div className="flex-1 px-3 py-2 text-sm text-[#16243a]">{value || ' '}</div>
-        </div>
+          <div className={`px-3 py-2 text-sm text-[#16243a] ${i > 0 ? 'border-t border-white' : ''}`}>
+            {value || ' '}
+          </div>
+        </Fragment>
       ))}
     </div>
   );
