@@ -12,6 +12,7 @@
  * ring/consumable labels are mapped to translated terms, others fall through.
  */
 import { Fragment } from 'react';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import type {
   MonthlyPerformanceReport,
@@ -120,15 +121,6 @@ function RingGauge({ label, percent }: { label: string; percent: number }) {
   );
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline gap-4">
-      <span className="w-36 shrink-0 text-[#16243a]">{label}</span>
-      <span className="text-[#16243a]">{value}</span>
-    </div>
-  );
-}
-
 function ConsumableRow({ item }: { item: ConsumableStatus }) {
   const t = useTranslations('report');
   const label = CONSUMABLE_KEYS[item.label] ? t(CONSUMABLE_KEYS[item.label]) : item.label;
@@ -167,11 +159,15 @@ function OperationalBlock({ o }: { o: OperationalPerformance }) {
           <RingGauge key={r.label} label={ringLabel(r)} percent={r.percent} />
         ))}
       </div>
-      <div className="mt-6 space-y-1.5 text-[15px]">
-        <DetailRow label={t('taskType')} value={o.taskType} />
-        <DetailRow label={t('taskStatus')} value={o.taskStatus} />
-        <DetailRow label={t('tasksPerDay')} value={o.tasksPerDay} />
-        <DetailRow label={t('averageRunTime')} value={o.averageRunTime} />
+      <div className="mt-6 grid grid-cols-[max-content_1fr] items-baseline gap-x-4 gap-y-1.5 text-[15px] text-[#16243a]">
+        <span>{t('taskType')}</span>
+        <span>{o.taskType}</span>
+        <span>{t('taskStatus')}</span>
+        <span>{o.taskStatus}</span>
+        <span>{t('tasksPerDay')}</span>
+        <span>{o.tasksPerDay}</span>
+        <span>{t('averageRunTime')}</span>
+        <span>{o.averageRunTime}</span>
       </div>
     </div>
   );
@@ -188,7 +184,17 @@ export function MonthlyReportView({ report }: { report: MonthlyPerformanceReport
         {/* ── Header ───────────────────────────────────────────────────────── */}
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
-            <h1 className="text-2xl font-bold leading-tight text-[#16243a] sm:text-[28px]">{t('title')}</h1>
+            <div className="flex flex-wrap items-center gap-3">
+              <Image
+                src="/raas-pal-wordmark.png"
+                alt="RAAS PAL"
+                width={240}
+                height={60}
+                priority
+                className="h-8 w-auto sm:h-9"
+              />
+              <h1 className="text-2xl font-bold leading-tight text-[#16243a] sm:text-[28px]">{t('title')}</h1>
+            </div>
             <p className="mt-1 text-xl font-bold text-[#16243a]">{report.periodLabel}</p>
           </div>
         </div>
